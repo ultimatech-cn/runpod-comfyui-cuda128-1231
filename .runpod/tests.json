@@ -1,0 +1,51 @@
+{
+  "tests": [
+    {
+      "name": "test_basic_workflow",
+      "input": {
+        "images": [
+          {
+            "name": "test_img.jpg",
+            "image": "https://pic.imgdd.cc/item/69071860c1e67097311264a1.jpg"
+          }
+        ],
+        "workflow": {
+          "1": {
+            "inputs": {
+              "image": "test_img.jpg"
+            },
+            "class_type": "LoadImage",
+            "_meta": {
+              "title": "Load Image"
+            }
+          },
+          "2": {
+            "inputs": {
+              "filename_prefix": "ComfyUI",
+              "images": [
+                "1",
+                0
+              ]
+            },
+            "class_type": "SaveImage",
+            "_meta": {
+              "title": "Save Image"
+            }
+          }
+        }
+      },
+      "timeout": 600000
+    }
+  ],
+  "config": {
+    "gpuTypeId": "NVIDIA GeForce RTX 5090",
+    "gpuCount": 1,
+    "env": [
+      {
+        "key": "REFRESH_WORKER",
+        "value": "false"
+      }
+    ],
+    "allowedCudaVersions": ["12.8"]
+  }
+}
