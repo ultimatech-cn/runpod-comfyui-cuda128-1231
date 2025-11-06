@@ -125,38 +125,45 @@ Network Volume 挂载到容器内的 `/runpod-volume`，ComfyUI 会自动从以�
 
 5. **删除临时 Pod**（节省成本）
 
-#### 方法 B: 使用脚本批量下载
+#### 方法 B: 使用自动化脚本批量下载（推荐）
 
-创建一个脚本 `upload-models.sh`：
+我们提供了一个自动化脚本，可以一键下载所有模型：
 
-```bash
-#!/bin/bash
-# 在临时 Pod 中运行此脚本
+1. **在临时 Pod 中克隆仓库**（或上传脚本）：
+   ```bash
+   # 如果 Network Volume 挂载在 /workspace
+   cd /workspace
+   
+   # 克隆仓库（或直接上传脚本文件）
+   git clone https://github.com/ultimatech-cn/runpod-comfyui-cuda128-pure.git
+   cd runpod-comfyui-cuda128-pure
+   ```
 
-VOLUME_PATH="/workspace"
-MODELS_DIR="$VOLUME_PATH/models"
+2. **运行下载脚本**：
+   ```bash
+   # 如果 Network Volume 挂载在 /workspace（默认）
+   bash scripts/download-models-to-volume.sh
+   
+   # 或者指定挂载路径（如果挂载在其他位置，如 /runpod-volume）
+   bash scripts/download-models-to-volume.sh /runpod-volume
+   ```
 
-# 创建目录结构
-mkdir -p $MODELS_DIR/{checkpoints/{SDXL,Wan2.2},loras/{SDXL,Wan2.2},clip_vision/wan,pulid,insightface/models,reswapper,hyperswap,facerestore_models,upscale_models}
+   脚本会自动：
+   - ✅ 创建所有必要的目录结构
+   - ✅ 下载所有 Checkpoint 模型
+   - ✅ 下载所有 LoRA 模型（SDXL 和 Wan2.2）
+   - ✅ 下载 CLIP Vision、PuLID、ReActor、HyperSwap 等模型
+   - ✅ 下载 InsightFace AntelopeV2 模型并解压
+   - ✅ 下载 BLIP 模型（如果 Python 可用）
+   - ✅ 显示下载进度和文件统计
+   - ✅ 跳过已存在的文件（支持断点续传）
 
-# 下载 Checkpoint 模型
-echo "Downloading checkpoints..."
-cd $MODELS_DIR/checkpoints/SDXL
-wget -q -O ultraRealisticByStable_v20FP16.safetensors \
-  "https://huggingface.co/datasets/Robin9527/LoRA/resolve/main/SDXL/ultraRealisticByStable_v20FP16.safetensors"
+3. **等待下载完成**：
+   - 脚本会显示每个文件的下载进度
+   - 完成后会显示文件统计信息
+   - 预计下载时间：根据网络速度，可能需要 30 分钟到 2 小时
 
-cd ../Wan2.2
-wget -q -O wan2.2-i2v-rapid-aio-v10-nsfw.safetensors \
-  "https://huggingface.co/Phr00t/WAN2.2-14B-Rapid-AllInOne/resolve/main/v10/wan2.2-i2v-rapid-aio-v10-nsfw.safetensors"
-
-# 下载 LoRA 模型
-echo "Downloading LoRAs..."
-cd $MODELS_DIR/loras/SDXL
-# 添加您需要的 LoRA 下载命令...
-
-# 下载其他模型...
-echo "Download complete!"
-```
+> 💡 **提示**：脚本支持断点续传，如果下载中断，重新运行脚本会跳过已下载的文件。
 
 ### 步骤 4: 构建优化版镜像
 
@@ -257,6 +264,7 @@ curl http://localhost:8188/object_info | jq '.CheckpointLoaderSimple.input.requi
 - [RunPod Serverless 概述](https://docs.runpod.io/serverless/overview)
 - [自定义配置指南](customization.md)
 - [部署指南](deployment.md)
+- [extra_model_paths.yaml 常见问题](extra_model_paths-faq.md) - 了解模型路径配置的详细说明
 
 ## ❓ 常见问题
 
@@ -277,4 +285,8 @@ A: 可以，但需要注意并发访问可能影响性能。建议为高负载�
 ### Q: Network Volume 的成本是多少？
 
 A: 根据 RunPod 定价，Network Volume 按存储容量和区域计费。请查看 [RunPod 定价页面](https://www.runpod.io/pricing) 获取最新价格。
+
+### Q: extra_model_paths.yaml 中没写的路径会自动加载吗？
+
+A: **不会**。只有 `extra_model_paths.yaml` 中明确配置的路径才会被 ComfyUI 搜索和加载。未配置的目录即使存在文件也不会被自动发现。详见 [extra_model_paths.yaml 常见问题](extra_model_paths-faq.md)。
 

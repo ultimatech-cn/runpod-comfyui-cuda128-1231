@@ -315,6 +315,8 @@ To optimize build time, use `Dockerfile.optimized` with Network Volume:
 
 See [Network Volume Setup Guide](docs/network-volume-setup.md) for detailed instructions.
 
+**Quick Model Download**: Use the automated script `scripts/download-models-to-volume.sh` to download all models in one go. See the guide for details.
+
 ## Publish to Docker Hub
 
 > **⚠️ Important Note (2024 Update)**:
@@ -380,6 +382,7 @@ docker push your-username/comfyui-cuda128:latest
 - **[Configuration Guide](docs/configuration.md)** — Environment variables and S3 configuration
 - **[Customization Guide](docs/customization.md)** — Custom nodes and models (including Network Volume approach)
 - **[Network Volume Setup](docs/network-volume-setup.md)** — 🚀 **Optimize Build Time**: Use Network Volume to store models, reducing build time from 1.5-5 hours to 10-30 minutes
+- **[extra_model_paths.yaml FAQ](docs/extra_model_paths-faq.md)** — Common questions about model path configuration
 - **[Deployment Guide](docs/deployment.md)** — Deploy endpoints on RunPod
 - **[CI/CD Guide](docs/ci-cd.md)** — Automated builds and publishing
 - **[Acknowledgments](docs/acknowledgments.md)** — Acknowledgments
