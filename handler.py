@@ -17,13 +17,20 @@ import logging
 
 # Configure logging to reduce numba verbose output
 # Numba's SSA block analysis and other debug logs can be very verbose
-# Set numba logger to WARNING level to suppress DEBUG/INFO messages
+# Set numba logger to ERROR level to suppress DEBUG/INFO/WARNING messages
 numba_logger = logging.getLogger('numba')
-numba_logger.setLevel(logging.WARNING)
+numba_logger.setLevel(logging.ERROR)
 
-# Also suppress numba.core logger
+# Also suppress numba.core and all numba sub-loggers
 numba_core_logger = logging.getLogger('numba.core')
-numba_core_logger.setLevel(logging.WARNING)
+numba_core_logger.setLevel(logging.ERROR)
+
+# Suppress all numba-related loggers
+for logger_name in ['numba', 'numba.core', 'numba.core.ssa', 'numba.core.ir', 'numba.core.types']:
+    logger = logging.getLogger(logger_name)
+    logger.setLevel(logging.ERROR)
+    # Disable propagation to prevent output
+    logger.propagate = False
 
 # Time to wait between API check attempts in milliseconds
 COMFY_API_AVAILABLE_INTERVAL_MS = 50

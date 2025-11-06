@@ -8,8 +8,12 @@ export LD_PRELOAD="${TCMALLOC}"
 # This prevents excessive logging that can cause performance issues
 export NUMBA_DEBUG=0
 export NUMBA_DISABLE_ERROR_MESSAGE_HIGHLIGHTING=1
+export NUMBA_DISABLE_JIT=0  # Keep JIT enabled but disable verbose output
+export NUMBA_LOG_LEVEL=ERROR  # Set numba logging to ERROR level only
 # Redirect numba's internal logging to reduce noise
 export PYTHONWARNINGS="ignore::numba.NumbaWarning"
+# Suppress numba's internal print statements (these bypass logging)
+export NUMBA_CAPTURED_ERRORS=1
 
 # Ensure ComfyUI-Manager runs in offline network mode inside the container
 comfy-manager-set-mode offline || echo "worker-comfyui - Could not set ComfyUI-Manager network_mode" >&2
