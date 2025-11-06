@@ -19,6 +19,14 @@ export NUMBA_DISABLE_TBB=1
 # Suppress numba compilation messages
 export NUMBA_DISABLE_JIT_WARNINGS=1
 
+# Set Hugging Face cache directory for BLIP and other transformers models
+# This ensures models downloaded to Network Volume are used at runtime
+if [ -d "/runpod-volume/models/blip" ]; then
+    export HF_HUB_CACHE="/runpod-volume/models/blip"
+    export TRANSFORMERS_CACHE="/runpod-volume/models/blip"
+    echo "worker-comfyui: Set HF_HUB_CACHE to /runpod-volume/models/blip"
+fi
+
 # Ensure ComfyUI-Manager runs in offline network mode inside the container
 comfy-manager-set-mode offline || echo "worker-comfyui - Could not set ComfyUI-Manager network_mode" >&2
 
