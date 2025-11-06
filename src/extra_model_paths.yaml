@@ -23,6 +23,7 @@ runpod_worker_comfy:
   
   # IP-Adapter and related
   ipadapter: models/ipadapter/
+  pulid: models/pulid/  # PuLID IP-Adapter models (used by PuLID_ComfyUI)
   
   # Face-related models
   insightface: models/insightface/
@@ -30,6 +31,10 @@ runpod_worker_comfy:
   facedetection: models/facedetection/
   facexlib: models/facexlib/
   instantid: models/instantid/
+  
+  # ReActor and HyperSwap models (used by ComfyUI-ReActor)
+  reswapper: models/reswapper/
+  hyperswap: models/hyperswap/
   
   # Vision and detection models
   photomaker: models/photomaker/
