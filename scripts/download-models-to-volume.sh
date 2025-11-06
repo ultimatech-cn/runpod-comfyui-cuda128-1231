@@ -126,10 +126,18 @@ echo "=========================================="
 echo "下载 ReActor 和 HyperSwap 模型"
 echo "=========================================="
 
+# inswapper_128.onnx 需要同时放在 insightface 和 reswapper 目录
+# ComfyUI-ReActor 的 swap_model 从 reswapper 目录读取
+download_file \
+    "https://huggingface.co/datasets/Gourieff/ReActor/resolve/main/models/inswapper_128.onnx" \
+    "$MODELS_DIR/reswapper/inswapper_128.onnx" \
+    "ReActor inswapper (for swap_model)"
+
+# 也放在 insightface 目录（某些节点可能需要）
 download_file \
     "https://huggingface.co/datasets/Gourieff/ReActor/resolve/main/models/inswapper_128.onnx" \
     "$MODELS_DIR/insightface/inswapper_128.onnx" \
-    "ReActor inswapper"
+    "ReActor inswapper (for insightface)"
 
 download_file \
     "https://huggingface.co/datasets/Gourieff/ReActor/resolve/main/models/reswapper_128.onnx" \
