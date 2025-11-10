@@ -3,10 +3,17 @@
 # 基于 Dockerfile 中的模型下载任务
 # 使用方法：在临时 Pod 中运行此脚本（Network Volume 已挂载）
 #
+# 重要说明：Network Volume 挂载点差异
+# - 临时 Pod：Network Volume 通常挂载在 /workspace
+# - Endpoint：Network Volume 挂载在 /runpod-volume
+# 这是同一个 Network Volume，只是挂载点不同
+# 在临时 Pod 中下载到 /workspace/models/ 的文件
+# 在 Endpoint 中可以从 /runpod-volume/models/ 访问
+#
 # 用法：
 #   bash scripts/download-models-to-volume.sh [VOLUME_PATH]
 #   如果不指定 VOLUME_PATH，默认使用 /workspace（RunPod 临时 Pod 的默认挂载点）
-#   如果 Network Volume 挂载到 /runpod-volume，使用：
+#   如果临时 Pod 中 Network Volume 挂载到 /runpod-volume，使用：
 #   bash scripts/download-models-to-volume.sh /runpod-volume
 
 set -e  # 遇到错误立即退出

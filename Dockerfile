@@ -1,6 +1,7 @@
-# 优化版 Dockerfile - 使用 Network Volume 存储模型
-# 此版本移除了所有模型下载，构建时间从 1.5-5 小时缩短到 10-30 分钟
-# 模型将通过 Network Volume 加载，详见 docs/network-volume-setup.md
+# 优化版 Dockerfile - 使用 Network Volume 存储所有模型
+# 此版本完全移除了所有模型下载（包括 insightface、BLIP 等），构建时间从 1.5-5 小时缩短到 10-30 分钟
+# 所有模型必须通过 download-models-to-volume.sh 下载到 Network Volume
+# 模型将通过软链接从 Network Volume 加载，详见 docs/network-volume-setup.md
 
 FROM runpod/worker-comfyui:5.5.0-base-cuda12.8.1
 
@@ -11,6 +12,11 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Copy custom handler.py to override the base image's handler
 # This allows you to use your enhanced handler with URL image support and path normalization
 COPY handler.py /handler.py
+
+# Copy custom start.sh to override the base image's start script
+# This includes symlink setup for Network Volume model directories
+COPY src/start.sh /start.sh
+RUN chmod +x /start.sh
 
 # Ensure required tools are installed (wget, git, unzip should already be in base image, but verify)
 # Note: build-essential, g++, and python3-dev are needed to compile insightface (Cython/C++ extensions)
@@ -29,8 +35,8 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 # 注意：不再创建模型目录，因为模型将存储在 Network Volume 中
-# Network Volume 挂载到 /runpod-volume，ComfyUI 会自动从 /runpod-volume/models/... 加载模型
-# 详见 src/extra_model_paths.yaml 配置
+# Network Volume 挂载到 /runpod-volume，通过软链接映射到 /comfyui/models/...
+# 软链接在容器启动时由 start.sh 自动创建
 
 # Install all custom nodes in a single RUN block (optimizes Docker layers)
 # Each node installs its requirements.txt if it exists
@@ -132,65 +138,45 @@ RUN git config --global --add safe.directory '*' && \
     \
     cd $COMFYUI_PATH
 
-# Support for Network Volume - Copy extra_model_paths.yaml to configure model loading
-# This file tells ComfyUI where to look for models in the Network Volume
-# Models should be placed in /runpod-volume/models/... according to this configuration
-WORKDIR $COMFYUI_PATH
-COPY src/extra_model_paths.yaml ./
-WORKDIR /
-
-# Download ReActor inswapper_128.onnx to ComfyUI default path
-# This ensures ReActor nodes can find the model even if extra_model_paths.yaml or symlinks fail
-# ReActor swap_model parameter expects inswapper_128.onnx in /comfyui/models/insightface/
-RUN mkdir -p $COMFYUI_PATH/models/insightface && \
-    wget -q --show-progress -O $COMFYUI_PATH/models/insightface/inswapper_128.onnx \
-    "https://huggingface.co/datasets/Gourieff/ReActor/resolve/main/models/inswapper_128.onnx" || \
-    (echo "Warning: Failed to download inswapper_128.onnx" && exit 0)
-
-# Pre-download InsightFace AntelopeV2 model for PuLID_ComfyUI
-# PuLID_ComfyUI expects /comfyui/models/insightface/models/antelopev2/
-# This provides a fallback if Network Volume doesn't have the model
-RUN mkdir -p $COMFYUI_PATH/models/insightface/models && \
-    wget -q -O /tmp/antelopev2.zip "https://huggingface.co/MonsterMMORPG/tools/resolve/main/antelopev2.zip" && \
-    test -f /tmp/antelopev2.zip || (echo "Error: Failed to download antelopev2.zip" && exit 1) && \
-    unzip -q /tmp/antelopev2.zip -d $COMFYUI_PATH/models/insightface/models/ && \
-    rm /tmp/antelopev2.zip
-
-# Pre-download BLIP models to avoid runtime download failures
-# BLIP models are used by was-node-suite-comfyui for image captioning and VQA
-# According to was-node-suite-comfyui, it uses /comfyui/models/blip as cache_dir
-# We download models using transformers library which will place them correctly
-# This provides a fallback if Network Volume doesn't have BLIP models
-RUN mkdir -p $COMFYUI_PATH/models/blip && \
-    python3 -c "from transformers import BlipProcessor, BlipForConditionalGeneration, BlipForQuestionAnswering; \
-    import os; \
-    blip_cache = '/comfyui/models/blip'; \
-    os.environ['HF_HUB_CACHE'] = blip_cache; \
-    os.environ['TRANSFORMERS_CACHE'] = blip_cache; \
-    os.environ['HF_HOME'] = blip_cache; \
-    print('Downloading BLIP image captioning model...'); \
-    BlipProcessor.from_pretrained('Salesforce/blip-image-captioning-base', cache_dir=blip_cache); \
-    BlipForConditionalGeneration.from_pretrained('Salesforce/blip-image-captioning-base', cache_dir=blip_cache); \
-    print('Downloading BLIP VQA model...'); \
-    BlipProcessor.from_pretrained('Salesforce/blip-vqa-base', cache_dir=blip_cache); \
-    BlipForQuestionAnswering.from_pretrained('Salesforce/blip-vqa-base', cache_dir=blip_cache); \
-    print('BLIP models downloaded successfully')" || \
-    (echo "Warning: Failed to download BLIP models" && exit 0)
+# Support for Network Volume - Use symlinks instead of extra_model_paths.yaml
+# Symlinks are created at runtime in start.sh to link /comfyui/models/* to /runpod-volume/models/*
+# This approach is more transparent and compatible with all nodes (including those with hardcoded paths)
+# No need to copy extra_model_paths.yaml - symlinks handle everything automatically
+#
+# IMPORTANT: All models must be downloaded to Network Volume using download-models-to-volume.sh
+# The following models are NO LONGER downloaded during image build:
+# - ReActor inswapper_128.onnx (should be in /runpod-volume/models/insightface/)
+# - InsightFace AntelopeV2 (should be in /runpod-volume/models/insightface/models/antelopev2/)
+# - BLIP models (should be in /runpod-volume/models/blip/)
+# 
+# Use the download script before deploying:
+#   bash scripts/download-models-to-volume.sh /runpod-volume
+#
+# If Network Volume doesn't have these models, nodes will attempt to download them at runtime,
+# but this may cause delays or failures. It's recommended to pre-download all models.
 
 # ============================================
-# 模型下载已移除 - 使用 Network Volume 存储模型
+# 模型下载已完全移除 - 使用 Network Volume 存储所有模型
 # ============================================
-# 所有模型（checkpoints、LoRAs、VAE、ControlNet 等）应存储在 Network Volume 中
+# 所有模型（checkpoints、LoRAs、VAE、ControlNet、insightface、BLIP 等）应存储在 Network Volume 中
 # Network Volume 挂载路径: /runpod-volume
 # 模型目录结构: /runpod-volume/models/checkpoints/, /runpod-volume/models/loras/, 等
 # 
-# extra_model_paths.yaml 已复制到 /comfyui/ 目录，ComfyUI 会自动读取此配置
-# 配置内容：base_path: /runpod-volume
+# 使用软链接方式（而非 extra_model_paths.yaml）：
+# - 容器启动时，start.sh 会自动创建软链接 /comfyui/models/* -> /runpod-volume/models/*
+# - 这种方式更透明，兼容所有节点（包括使用硬编码路径的节点）
+# - 无需维护配置文件，自动适配所有模型目录
 # 
 # 配置步骤：
 # 1. 在 RunPod 控制台创建 Network Volume
-# 2. 将模型上传到 Network Volume（使用临时 Pod 或直接上传）
+# 2. 在临时 Pod 中运行下载脚本（Network Volume 已挂载）：
+#    bash scripts/download-models-to-volume.sh /runpod-volume
 # 3. 在 Endpoint 配置中附加 Network Volume
+# 
+# 注意：
+# - 如果 Network Volume 中没有模型，节点会在运行时尝试下载，但可能导致延迟或失败
+# - 强烈建议在部署前使用 download-models-to-volume.sh 预下载所有模型
+# - 构建时间将从 1.5-5 小时缩短到 10-30 分钟（仅安装节点，不下载模型）
 # 
 # 详细说明请参考: docs/network-volume-setup.md
 # ============================================

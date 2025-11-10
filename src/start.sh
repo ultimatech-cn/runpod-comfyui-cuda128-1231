@@ -51,50 +51,162 @@ fi
 # Ensure ComfyUI-Manager runs in offline network mode inside the container
 comfy-manager-set-mode offline || echo "worker-comfyui - Could not set ComfyUI-Manager network_mode" >&2
 
-# Create symlinks from Network Volume to ComfyUI default paths for ReActor nodes
-# Some nodes (like ReActor) may use hardcoded paths /comfyui/models/insightface/
-# instead of reading from extra_model_paths.yaml
-# This ensures they can find models in the Network Volume
+# Create symlinks from Network Volume to ComfyUI default paths
+# This replaces extra_model_paths.yaml with a more transparent approach
+# All nodes (including those with hardcoded paths) can find models in Network Volume
+# Using symlinks ensures compatibility with all ComfyUI nodes and custom nodes
+#
+# IMPORTANT: Network Volume mount points differ between environments:
+# - Temporary Pod: Network Volume mounts at /workspace
+# - Endpoint: Network Volume mounts at /runpod-volume
+# This script runs in Endpoint, so it checks /runpod-volume
+# Models downloaded in Temporary Pod to /workspace/models/ will be accessible
+# at /runpod-volume/models/ in Endpoint (same Volume, different mount point)
 if [ -d "/runpod-volume/models" ]; then
-    echo "worker-comfyui: Setting up model directory symlinks for ReActor compatibility"
+    echo "worker-comfyui: Setting up model directory symlinks from Network Volume"
     
-    # Create insightface symlink if Network Volume has the directory
-    # PuLID_ComfyUI and other nodes expect /comfyui/models/insightface/models/antelopev2/
-    if [ -d "/runpod-volume/models/insightface" ]; then
-        # Remove existing directory if it's empty or create backup
-        if [ -d "/comfyui/models/insightface" ] && [ ! -L "/comfyui/models/insightface" ]; then
-            # If directory exists and is not a symlink, check if it's empty
-            if [ -z "$(ls -A /comfyui/models/insightface 2>/dev/null)" ]; then
-                rmdir /comfyui/models/insightface 2>/dev/null || true
+    # Function to create symlink for a model directory
+    # Maps: /comfyui/models/{dir} -> /runpod-volume/models/{dir}
+    # Note: In Temporary Pod, Network Volume mounts at /workspace
+    #       In Endpoint, Network Volume mounts at /runpod-volume
+    #       Both point to the same Volume, so files are accessible regardless of mount point
+    create_model_symlink() {
+        local model_dir="$1"
+        local source_path="/runpod-volume/models/${model_dir}"  # Endpoint mount point
+        local target_path="/comfyui/models/${model_dir}"         # ComfyUI default path
+        
+        # Only create symlink if source exists in Network Volume
+        if [ -d "$source_path" ]; then
+            # Check if target already exists
+            if [ -e "$target_path" ]; then
+                # If it's already a symlink pointing to the correct location, skip
+                if [ -L "$target_path" ]; then
+                    # Check if symlink points to the correct location
+                    # We create absolute symlinks, so we can directly compare
+                    local current_target=$(readlink "$target_path" 2>/dev/null)
+                    if [ "$current_target" = "$source_path" ]; then
+                        # Symlink already points to correct location, skip
+                        return 0
+                    fi
+                    # Symlink points to wrong location or is broken, remove it
+                    rm -f "$target_path"
+                elif [ -d "$target_path" ]; then
+                    # Target is a directory (may be non-empty), need to backup and remove
+                    # Create backup directory if it doesn't exist
+                    local backup_dir="/comfyui/models/.backup"
+                    mkdir -p "$backup_dir"
+                    
+                    # Move existing directory to backup location with timestamp
+                    local backup_path="${backup_dir}/${model_dir}.$(date +%s)"
+                    if [ -d "$backup_path" ]; then
+                        # If backup already exists (unlikely), append random suffix
+                        backup_path="${backup_path}.$$"
+                    fi
+                    mv "$target_path" "$backup_path" 2>/dev/null || {
+                        echo "worker-comfyui: WARNING: Failed to backup existing directory ${target_path}, attempting to remove it"
+                        # If move fails, try to remove (this will fail if directory is not empty and in use)
+                        rm -rf "$target_path" 2>/dev/null || {
+                            echo "worker-comfyui: ERROR: Cannot remove existing directory ${target_path}, symlink creation skipped"
+                            return 1
+                        }
+                    }
+                    echo "worker-comfyui: Backed up existing directory ${target_path} to ${backup_path}"
+                else
+                    # Target exists but is not a directory or symlink (file?), remove it
+                    rm -f "$target_path"
+                fi
             fi
-        fi
-        # Create symlink if it doesn't exist
-        if [ ! -e "/comfyui/models/insightface" ]; then
-            mkdir -p /comfyui/models
-            ln -sf /runpod-volume/models/insightface /comfyui/models/insightface
-            echo "worker-comfyui: Created symlink /comfyui/models/insightface -> /runpod-volume/models/insightface"
-            # Verify antelopev2 subdirectory exists
-            if [ -d "/runpod-volume/models/insightface/models/antelopev2" ]; then
-                echo "worker-comfyui: Found antelopev2 model in Network Volume"
+            
+            # Create parent directory if it doesn't exist
+            mkdir -p "$(dirname "$target_path")"
+            
+            # Create symlink
+            if ln -sf "$source_path" "$target_path" 2>/dev/null; then
+                echo "worker-comfyui: Created symlink ${target_path} -> ${source_path}"
             else
-                echo "worker-comfyui: WARNING: antelopev2 model not found in Network Volume"
-                echo "worker-comfyui: PuLID_ComfyUI will attempt to download it automatically"
+                echo "worker-comfyui: ERROR: Failed to create symlink ${target_path} -> ${source_path}"
+                return 1
             fi
         fi
-    fi
+    }
     
-    # Create reswapper symlink if Network Volume has the directory
-    if [ -d "/runpod-volume/models/reswapper" ]; then
-        if [ -d "/comfyui/models/reswapper" ] && [ ! -L "/comfyui/models/reswapper" ]; then
-            if [ -z "$(ls -A /comfyui/models/reswapper 2>/dev/null)" ]; then
-                rmdir /comfyui/models/reswapper 2>/dev/null || true
-            fi
-        fi
-        if [ ! -e "/comfyui/models/reswapper" ]; then
-            mkdir -p /comfyui/models
-            ln -sf /runpod-volume/models/reswapper /comfyui/models/reswapper
-            echo "worker-comfyui: Created symlink /comfyui/models/reswapper -> /runpod-volume/models/reswapper"
-        fi
+    # Core ComfyUI model directories
+    create_model_symlink "checkpoints"
+    create_model_symlink "clip"
+    create_model_symlink "clip_vision"
+    create_model_symlink "configs"
+    create_model_symlink "controlnet"
+    create_model_symlink "diffusers"
+    create_model_symlink "embeddings"
+    create_model_symlink "gligen"
+    create_model_symlink "hypernetworks"
+    create_model_symlink "loras"
+    create_model_symlink "style_models"
+    create_model_symlink "unet"
+    create_model_symlink "upscale_models"
+    create_model_symlink "vae"
+    create_model_symlink "vae_approx"
+    
+    # AnimateDiff model directories
+    create_model_symlink "animatediff_models"
+    create_model_symlink "animatediff_motion_lora"
+    
+    # IP-Adapter and related
+    create_model_symlink "ipadapter"
+    create_model_symlink "pulid"
+    
+    # Face-related models
+    create_model_symlink "insightface"
+    create_model_symlink "facerestore_models"
+    create_model_symlink "facedetection"
+    create_model_symlink "facexlib"
+    create_model_symlink "instantid"
+    
+    # ReActor and HyperSwap models
+    create_model_symlink "reswapper"
+    create_model_symlink "hyperswap"
+    
+    # Vision and detection models
+    create_model_symlink "photomaker"
+    create_model_symlink "sams"
+    create_model_symlink "mmdets"
+    create_model_symlink "ultralytics"
+    create_model_symlink "grounding-dino"
+    create_model_symlink "depthanything"
+    create_model_symlink "florence2"
+    create_model_symlink "BiRefNet"
+    
+    # Video models
+    create_model_symlink "CogVideo"
+    
+    # Audio models
+    create_model_symlink "audio_encoders"
+    
+    # BLIP models (for image captioning)
+    create_model_symlink "blip"
+    
+    # Inpainting models
+    create_model_symlink "inpaint"
+    
+    # Diffusion models (alternative location)
+    create_model_symlink "diffusion_models"
+    
+    # Custom model directories (project-specific)
+    create_model_symlink "bagel"
+    create_model_symlink "Ben"
+    create_model_symlink "CatVTON"
+    create_model_symlink "Janus-Pro"
+    create_model_symlink "Flux-version-LayerDiffuse"
+    create_model_symlink "prompt_generator"
+    
+    echo "worker-comfyui: Model directory symlinks setup complete"
+    
+    # Verify antelopev2 subdirectory for PuLID_ComfyUI
+    if [ -d "/runpod-volume/models/insightface/models/antelopev2" ]; then
+        echo "worker-comfyui: Found antelopev2 model in Network Volume"
+    elif [ -L "/comfyui/models/insightface" ]; then
+        echo "worker-comfyui: WARNING: antelopev2 model not found in Network Volume"
+        echo "worker-comfyui: PuLID_ComfyUI will attempt to download it automatically"
     fi
 fi
 
