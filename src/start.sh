@@ -179,6 +179,13 @@ if [ -n "$VOLUME_MODELS_PATH" ]; then
     # Video models
     create_model_symlink "CogVideo"
     
+    # Special: Link VFI models to the specific node directory if needed
+    if [ -d "${VOLUME_MODELS_PATH}/vfi" ]; then
+        mkdir -p /comfyui/custom_nodes/ComfyUI-Frame-Interpolation/ckpts/rife
+        ln -sf "${VOLUME_MODELS_PATH}/vfi/rife47.pth" /comfyui/custom_nodes/ComfyUI-Frame-Interpolation/ckpts/rife/rife47.pth
+        echo "worker-comfyui: Special symlink created for RIFE VFI"
+    fi
+    
     # Audio models
     create_model_symlink "audio_encoders"
     
@@ -192,6 +199,7 @@ if [ -n "$VOLUME_MODELS_PATH" ]; then
     create_model_symlink "diffusion_models"
     
     # Custom model directories (project-specific)
+    create_model_symlink "LLM"
     create_model_symlink "bagel"
     create_model_symlink "Ben"
     create_model_symlink "CatVTON"
