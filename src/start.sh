@@ -67,23 +67,34 @@ comfy-manager-set-mode offline || echo "worker-comfyui - Could not set ComfyUI-M
 echo "worker-comfyui: Checking Network Volume mount..."
 if [ -d "/runpod-volume" ]; then
     echo "worker-comfyui: /runpod-volume exists"
+    
+    # Detect the actual models directory on the volume
+    # Priority: /runpod-volume/storage/models > /runpod-volume/models
+    if [ -d "/runpod-volume/storage/models" ]; then
+        VOLUME_MODELS_PATH="/runpod-volume/storage/models"
+        echo "worker-comfyui: Detected models in storage subdirectory: ${VOLUME_MODELS_PATH}"
+    elif [ -d "/runpod-volume/models" ]; then
+        VOLUME_MODELS_PATH="/runpod-volume/models"
+        echo "worker-comfyui: Detected models in root directory: ${VOLUME_MODELS_PATH}"
+    else
+        VOLUME_MODELS_PATH=""
+        echo "worker-comfyui: WARNING: No 'models' or 'storage/models' directory found on /runpod-volume"
+    fi
+    
     ls -la /runpod-volume/ | head -5 || echo "worker-comfyui: Cannot list /runpod-volume"
 else
+    VOLUME_MODELS_PATH=""
     echo "worker-comfyui: WARNING: /runpod-volume does not exist"
 fi
 
-if [ -d "/runpod-volume/models" ]; then
-    echo "worker-comfyui: /runpod-volume/models exists, setting up symlinks"
-    echo "worker-comfyui: Setting up model directory symlinks from Network Volume"
+if [ -n "$VOLUME_MODELS_PATH" ]; then
+    echo "worker-comfyui: Setting up model directory symlinks from ${VOLUME_MODELS_PATH}"
     
     # Function to create symlink for a model directory
-    # Maps: /comfyui/models/{dir} -> /runpod-volume/models/{dir}
-    # Note: In Temporary Pod, Network Volume mounts at /workspace
-    #       In Endpoint, Network Volume mounts at /runpod-volume
-    #       Both point to the same Volume, so files are accessible regardless of mount point
+    # Maps: /comfyui/models/{dir} -> {VOLUME_MODELS_PATH}/{dir}
     create_model_symlink() {
         local model_dir="$1"
-        local source_path="/runpod-volume/models/${model_dir}"  # Endpoint mount point
+        local source_path="${VOLUME_MODELS_PATH}/${model_dir}"  # Endpoint mount point
         local target_path="/comfyui/models/${model_dir}"         # ComfyUI default path
         
         # Only create symlink if source exists in Network Volume
@@ -93,7 +104,6 @@ if [ -d "/runpod-volume/models" ]; then
                 # If it's already a symlink pointing to the correct location, skip
                 if [ -L "$target_path" ]; then
                     # Check if symlink points to the correct location
-                    # We create absolute symlinks, so we can directly compare
                     local current_target=$(readlink "$target_path" 2>/dev/null)
                     if [ "$current_target" = "$source_path" ]; then
                         # Symlink already points to correct location, skip
@@ -102,42 +112,21 @@ if [ -d "/runpod-volume/models" ]; then
                     # Symlink points to wrong location or is broken, remove it
                     rm -f "$target_path"
                 elif [ -d "$target_path" ]; then
-                    # Target is a directory (may be non-empty), need to backup and remove
-                    # Create backup directory if it doesn't exist
+                    # Target is a directory (may be non-empty), backup and remove
                     local backup_dir="/comfyui/models/.backup"
                     mkdir -p "$backup_dir"
-                    
-                    # Move existing directory to backup location with timestamp
                     local backup_path="${backup_dir}/${model_dir}.$(date +%s)"
-                    if [ -d "$backup_path" ]; then
-                        # If backup already exists (unlikely), append random suffix
-                        backup_path="${backup_path}.$$"
-                    fi
                     mv "$target_path" "$backup_path" 2>/dev/null || {
-                        echo "worker-comfyui: WARNING: Failed to backup existing directory ${target_path}, attempting to remove it"
-                        # If move fails, try to remove (this will fail if directory is not empty and in use)
-                        rm -rf "$target_path" 2>/dev/null || {
-                            echo "worker-comfyui: ERROR: Cannot remove existing directory ${target_path}, symlink creation skipped"
-                            return 1
-                        }
+                        rm -rf "$target_path" 2>/dev/null || return 1
                     }
-                    echo "worker-comfyui: Backed up existing directory ${target_path} to ${backup_path}"
                 else
-                    # Target exists but is not a directory or symlink (file?), remove it
                     rm -f "$target_path"
                 fi
             fi
             
-            # Create parent directory if it doesn't exist
+            # Create parent directory and symlink
             mkdir -p "$(dirname "$target_path")"
-            
-            # Create symlink
-            if ln -sf "$source_path" "$target_path" 2>/dev/null; then
-                echo "worker-comfyui: Created symlink ${target_path} -> ${source_path}"
-            else
-                echo "worker-comfyui: ERROR: Failed to create symlink ${target_path} -> ${source_path}"
-                return 1
-            fi
+            ln -sf "$source_path" "$target_path" 2>/dev/null && echo "worker-comfyui: Created symlink ${target_path} -> ${source_path}"
         fi
     }
     
