@@ -1,0 +1,229 @@
+{
+  "input": {
+    "images": [
+      {
+        "name": "test_img.jpg",
+        "image": "https://pic.imgdd.cc/item/69071860c1e67097311264a1.jpg"
+      }
+    ],
+    "workflow": {
+      "3": {
+        "inputs": {
+          "seed": 836786622119753,
+          "steps": 8,
+          "cfg": 1.1,
+          "sampler_name": "lcm",
+          "scheduler": "exponential",
+          "denoise": 1,
+          "model": [
+            "111",
+            0
+          ],
+          "positive": [
+            "22",
+            0
+          ],
+          "negative": [
+            "23",
+            0
+          ],
+          "latent_image": [
+            "46",
+            0
+          ]
+        },
+        "class_type": "KSampler",
+        "_meta": {
+          "title": "KSampler"
+        }
+      },
+      "4": {
+        "inputs": {
+          "ckpt_name": "SDXL/ultraRealisticByStable_v20FP16.safetensors"
+        },
+        "class_type": "CheckpointLoaderSimple",
+        "_meta": {
+          "title": "Load Checkpoint"
+        }
+      },
+      "8": {
+        "inputs": {
+          "samples": [
+            "3",
+            0
+          ],
+          "vae": [
+            "4",
+            2
+          ]
+        },
+        "class_type": "VAEDecode",
+        "_meta": {
+          "title": "VAE Decode"
+        }
+      },
+      "12": {
+        "inputs": {
+          "image": "test_img.jpg"
+        },
+        "class_type": "LoadImage",
+        "_meta": {
+          "title": "Load Image"
+        }
+      },
+      "22": {
+        "inputs": {
+          "text": [
+            "79",
+            0
+          ],
+          "clip": [
+            "111",
+            1
+          ]
+        },
+        "class_type": "CLIPTextEncode",
+        "_meta": {
+          "title": "CLIP Text Encode (Prompt)"
+        }
+      },
+      "23": {
+        "inputs": {
+          "text": "flaws in the eyes, flaws in the face, flaws, lowres, non-HDRi, low quality, worst quality,artifacts noise, text, watermark, glitch, deformed, mutated, ugly, disfigured, hands, low resolution, partially rendered objects,  deformed or partially rendered eyes, deformed, deformed eyeballs, cross-eyed,blurry",
+          "clip": [
+            "111",
+            1
+          ]
+        },
+        "class_type": "CLIPTextEncode",
+        "_meta": {
+          "title": "CLIP Text Encode (Prompt)"
+        }
+      },
+      "44": {
+        "inputs": {
+          "lora_name": "SDXL/LCMV2-PONYplus-PAseer.safetensors",
+          "strength_model": 1,
+          "model": [
+            "4",
+            0
+          ]
+        },
+        "class_type": "LoraLoaderModelOnly",
+        "_meta": {
+          "title": "LoraLoaderModelOnly"
+        }
+      },
+      "46": {
+        "inputs": {
+          "dimensions": " 832 x 1216  (portrait)",
+          "clip_scale": 1,
+          "batch_size": 1
+        },
+        "class_type": "SDXL Empty Latent Image (rgthree)",
+        "_meta": {
+          "title": "SDXL Empty Latent Image (rgthree)"
+        }
+      },
+      "79": {
+        "inputs": {
+          "delimiter": ", ",
+          "clean_whitespace": "true",
+          "text_a": [
+            "141",
+            0
+          ]
+        },
+        "class_type": "Text Concatenate",
+        "_meta": {
+          "title": "Text Concatenate"
+        }
+      },
+      "99": {
+        "inputs": {
+          "enabled": true,
+          "swap_model": "inswapper_128.onnx",
+          "facedetection": "retinaface_resnet50",
+          "face_restore_model": "GPEN-BFR-512.onnx",
+          "face_restore_visibility": 1,
+          "codeformer_weight": 0.5,
+          "detect_gender_input": "no",
+          "detect_gender_source": "no",
+          "input_faces_index": "0",
+          "source_faces_index": "0",
+          "console_log_level": 1,
+          "input_image": [
+            "8",
+            0
+          ],
+          "source_image": [
+            "12",
+            0
+          ]
+        },
+        "class_type": "ReActorFaceSwap",
+        "_meta": {
+          "title": "ReActor 🌌 Fast Face Swap"
+        }
+      },
+      "108": {
+        "inputs": {
+          "boolean": false,
+          "on_true": [
+            "8",
+            0
+          ],
+          "on_false": [
+            "99",
+            0
+          ]
+        },
+        "class_type": "Switch any [Crystools]",
+        "_meta": {
+          "title": "face involved ?"
+        }
+      },
+      "111": {
+        "inputs": {
+          "lora_name": "SDXL/subtle-analsex-xl3.safetensors",
+          "strength_model": 0.8,
+          "strength_clip": 0.8,
+          "model": [
+            "44",
+            0
+          ],
+          "clip": [
+            "4",
+            1
+          ]
+        },
+        "class_type": "LoraLoader",
+        "_meta": {
+          "title": "anal?"
+        }
+      },
+      "112": {
+        "inputs": {
+          "filename_prefix": "ComfyUI",
+          "images": [
+            "108",
+            0
+          ]
+        },
+        "class_type": "SaveImage",
+        "_meta": {
+          "title": "Save Image"
+        }
+      },
+      "141": {
+        "inputs": {
+          "text": "A girl is passionately performing (anal sex:2) on a partner, her movements fluid and intense."
+        },
+        "class_type": "Text Multiline",
+        "_meta": {
+          "title": "Text Multiline"
+        }
+      }
+    }
+  }
+}

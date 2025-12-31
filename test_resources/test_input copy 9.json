@@ -1,0 +1,1153 @@
+{
+  "input": {
+    "images": [
+      {
+        "name": "test_img.jpg",
+        "image": "https://pic.imgdd.cc/item/69071860c1e67097311264a1.jpg"
+      }
+    ],
+    "workflow": {
+      "141": {
+        "inputs": {
+          "image": "test_img.jpg"
+        },
+        "class_type": "LoadImage",
+        "_meta": {
+          "title": "Load Image"
+        }
+      },
+      "142": {
+        "inputs": {
+          "text": [
+            "152",
+            0
+          ],
+          "clip": [
+            "147",
+            1
+          ]
+        },
+        "class_type": "CLIPTextEncode",
+        "_meta": {
+          "title": "CLIP Text Encode (Prompt)"
+        }
+      },
+      "143": {
+        "inputs": {
+          "text": "flaws in the eyes, flaws in the face, flaws, lowres, non-HDRi, low quality, worst quality,artifacts noise, text, watermark, glitch, deformed, mutated, ugly, disfigured, hands, low resolution, partially rendered objects,  deformed or partially rendered eyes, deformed, deformed eyeballs, cross-eyed,blurry",
+          "clip": [
+            "147",
+            1
+          ]
+        },
+        "class_type": "CLIPTextEncode",
+        "_meta": {
+          "title": "CLIP Text Encode (Prompt)"
+        }
+      },
+      "145": {
+        "inputs": {
+          "samples": [
+            "158",
+            0
+          ],
+          "vae": [
+            "153",
+            2
+          ]
+        },
+        "class_type": "VAEDecode",
+        "_meta": {
+          "title": "VAE Decode"
+        }
+      },
+      "146": {
+        "inputs": {
+          "method": "fidelity",
+          "weight": 0.65,
+          "start_at": 0,
+          "end_at": 0.9,
+          "model": [
+            "154",
+            0
+          ],
+          "pulid": [
+            "148",
+            0
+          ],
+          "eva_clip": [
+            "149",
+            0
+          ],
+          "face_analysis": [
+            "150",
+            0
+          ],
+          "image": [
+            "188",
+            0
+          ]
+        },
+        "class_type": "ApplyPulid",
+        "_meta": {
+          "title": "Apply PuLID"
+        }
+      },
+      "147": {
+        "inputs": {
+          "lora_name": "SDXL\\subtle-analsex-xl3.safetensors",
+          "strength_model": 0,
+          "strength_clip": 0,
+          "model": [
+            "146",
+            0
+          ],
+          "clip": [
+            "153",
+            1
+          ]
+        },
+        "class_type": "LoraLoader",
+        "_meta": {
+          "title": "anal?"
+        }
+      },
+      "148": {
+        "inputs": {
+          "pulid_file": "ip-adapter_pulid_sdxl_fp16.safetensors"
+        },
+        "class_type": "PulidModelLoader",
+        "_meta": {
+          "title": "Load PuLID Model"
+        }
+      },
+      "149": {
+        "inputs": {},
+        "class_type": "PulidEvaClipLoader",
+        "_meta": {
+          "title": "Load Eva Clip (PuLID)"
+        }
+      },
+      "150": {
+        "inputs": {
+          "provider": "CPU"
+        },
+        "class_type": "PulidInsightFaceLoader",
+        "_meta": {
+          "title": "Load InsightFace (PuLID)"
+        }
+      },
+      "151": {
+        "inputs": {
+          "enabled": true,
+          "swap_model": "inswapper_128.onnx",
+          "facedetection": "retinaface_resnet50",
+          "face_restore_model": "GPEN-BFR-512.onnx",
+          "face_restore_visibility": 1,
+          "codeformer_weight": 0.5,
+          "detect_gender_input": "no",
+          "detect_gender_source": "no",
+          "input_faces_index": "0",
+          "source_faces_index": "0",
+          "console_log_level": 1,
+          "input_image": [
+            "145",
+            0
+          ],
+          "source_image": [
+            "188",
+            0
+          ]
+        },
+        "class_type": "ReActorFaceSwap",
+        "_meta": {
+          "title": "ReActor 🌌 Fast Face Swap"
+        }
+      },
+      "152": {
+        "inputs": {
+          "delimiter": ", ",
+          "clean_whitespace": "true",
+          "text_a": [
+            "157",
+            0
+          ],
+          "text_b": [
+            "221",
+            0
+          ]
+        },
+        "class_type": "Text Concatenate",
+        "_meta": {
+          "title": "Text Concatenate"
+        }
+      },
+      "153": {
+        "inputs": {
+          "ckpt_name": "SDXL\\ultraRealisticByStable_v20FP16.safetensors"
+        },
+        "class_type": "CheckpointLoaderSimple",
+        "_meta": {
+          "title": "Load Checkpoint"
+        }
+      },
+      "154": {
+        "inputs": {
+          "lora_name": "SDXL\\LCMV2-PONYplus-PAseer.safetensors",
+          "strength_model": 1,
+          "model": [
+            "153",
+            0
+          ]
+        },
+        "class_type": "LoraLoaderModelOnly",
+        "_meta": {
+          "title": "LoraLoaderModelOnly"
+        }
+      },
+      "155": {
+        "inputs": {
+          "blip_model": "Salesforce/blip-image-captioning-base",
+          "vqa_model_id": "Salesforce/blip-vqa-base",
+          "device": "cpu"
+        },
+        "class_type": "BLIP Model Loader",
+        "_meta": {
+          "title": "BLIP Model Loader"
+        }
+      },
+      "157": {
+        "inputs": {
+          "text": "a beautiful woman on the beach, showing her full body"
+        },
+        "class_type": "Text Multiline",
+        "_meta": {
+          "title": "Text Multiline"
+        }
+      },
+      "158": {
+        "inputs": {
+          "seed": 808265857222642,
+          "steps": [
+            "200",
+            0
+          ],
+          "cfg": 1.1,
+          "sampler_name": "lcm",
+          "scheduler": "exponential",
+          "denoise": 1,
+          "model": [
+            "147",
+            0
+          ],
+          "positive": [
+            "142",
+            0
+          ],
+          "negative": [
+            "143",
+            0
+          ],
+          "latent_image": [
+            "191",
+            0
+          ]
+        },
+        "class_type": "KSampler",
+        "_meta": {
+          "title": "KSampler"
+        }
+      },
+      "159": {
+        "inputs": {
+          "boolean": false,
+          "on_true": [
+            "145",
+            0
+          ],
+          "on_false": [
+            "151",
+            0
+          ]
+        },
+        "class_type": "Switch any [Crystools]",
+        "_meta": {
+          "title": "face involved ?"
+        }
+      },
+      "175": {
+        "inputs": {
+          "frame_rate": 32,
+          "loop_count": 0,
+          "filename_prefix": "AnimateDiff",
+          "format": "video/h264-mp4",
+          "pix_fmt": "yuv420p",
+          "crf": 19,
+          "save_metadata": false,
+          "trim_to_audio": false,
+          "pingpong": false,
+          "save_output": true,
+          "images": [
+            "187",
+            0
+          ]
+        },
+        "class_type": "VHS_VideoCombine",
+        "_meta": {
+          "title": "Video Combine 🎥🅥🅗🅢"
+        }
+      },
+      "176": {
+        "inputs": {
+          "samples": [
+            "180",
+            0
+          ],
+          "vae": [
+            "178",
+            2
+          ]
+        },
+        "class_type": "VAEDecode",
+        "_meta": {
+          "title": "VAE Decode"
+        }
+      },
+      "177": {
+        "inputs": {
+          "clip_name": "wan\\clip_vision_h.safetensors"
+        },
+        "class_type": "CLIPVisionLoader",
+        "_meta": {
+          "title": "Load CLIP Vision"
+        }
+      },
+      "178": {
+        "inputs": {
+          "ckpt_name": "Wan2.2\\wan2.2-i2v-rapid-aio-v10-nsfw.safetensors"
+        },
+        "class_type": "CheckpointLoaderSimple",
+        "_meta": {
+          "title": "Load Checkpoint"
+        }
+      },
+      "179": {
+        "inputs": {
+          "crop": "center",
+          "clip_vision": [
+            "177",
+            0
+          ],
+          "image": [
+            "185",
+            0
+          ]
+        },
+        "class_type": "CLIPVisionEncode",
+        "_meta": {
+          "title": "CLIP Vision Encode"
+        }
+      },
+      "180": {
+        "inputs": {
+          "add_noise": "enable",
+          "noise_seed": 1093755906167497,
+          "steps": 4,
+          "cfg": 1,
+          "sampler_name": "sa_solver",
+          "scheduler": "beta",
+          "start_at_step": 0,
+          "end_at_step": 10000,
+          "return_with_leftover_noise": "enable",
+          "model": [
+            "181",
+            0
+          ],
+          "positive": [
+            "184",
+            0
+          ],
+          "negative": [
+            "184",
+            1
+          ],
+          "latent_image": [
+            "184",
+            2
+          ]
+        },
+        "class_type": "KSamplerAdvanced",
+        "_meta": {
+          "title": "KSampler (Advanced)"
+        }
+      },
+      "181": {
+        "inputs": {
+          "shift": 8,
+          "model": [
+            "182",
+            0
+          ]
+        },
+        "class_type": "ModelSamplingSD3",
+        "_meta": {
+          "title": "ModelSamplingSD3"
+        }
+      },
+      "182": {
+        "inputs": {
+          "lora_name": "Wan2.2\\pworship_low_noise.safetensors",
+          "strength_model": 1,
+          "model": [
+            "178",
+            0
+          ]
+        },
+        "class_type": "LoraLoaderModelOnly",
+        "_meta": {
+          "title": "LoraLoaderModelOnly"
+        }
+      },
+      "183": {
+        "inputs": {
+          "text": "A woman is engaged in enthusiastic penis worshipping, She licks the shaft, with close-up camera angles focusing on her face and the act.",
+          "clip": [
+            "178",
+            1
+          ]
+        },
+        "class_type": "CLIPTextEncode",
+        "_meta": {
+          "title": "CLIP Text Encode (Positive Prompt)"
+        }
+      },
+      "184": {
+        "inputs": {
+          "width": [
+            "185",
+            1
+          ],
+          "height": [
+            "185",
+            2
+          ],
+          "length": 141,
+          "batch_size": 1,
+          "positive": [
+            "183",
+            0
+          ],
+          "negative": [
+            "186",
+            0
+          ],
+          "vae": [
+            "178",
+            2
+          ],
+          "clip_vision_output": [
+            "179",
+            0
+          ],
+          "start_image": [
+            "185",
+            0
+          ]
+        },
+        "class_type": "WanImageToVideo",
+        "_meta": {
+          "title": "WanImageToVideo"
+        }
+      },
+      "185": {
+        "inputs": {
+          "width": 0,
+          "height": 576,
+          "upscale_method": "lanczos",
+          "keep_proportion": "resize",
+          "pad_color": "0, 0, 0",
+          "crop_position": "center",
+          "divisible_by": 16,
+          "device": "cpu",
+          "image": [
+            "159",
+            0
+          ]
+        },
+        "class_type": "ImageResizeKJv2",
+        "_meta": {
+          "title": "Resize Image v2"
+        }
+      },
+      "186": {
+        "inputs": {
+          "text": "Blurry face, distorted features, extra fingers, poorly drawn hands, poorly drawn face, deformed limbs, fused fingers, disfigured face, mutilated face, incomplete body parts, three legs, walking backwards, crowded background, cluttered background, ugly skin, bad skin, spots, blemishes, overexposed skin, grayish tones, low quality, JPEG compression artifacts, static image,",
+          "clip": [
+            "178",
+            1
+          ]
+        },
+        "class_type": "CLIPTextEncode",
+        "_meta": {
+          "title": "CLIP Text Encode (Negative Prompt)"
+        }
+      },
+      "187": {
+        "inputs": {
+          "ckpt_name": "rife47.pth",
+          "clear_cache_after_n_frames": 10,
+          "multiplier": 2,
+          "fast_mode": true,
+          "ensemble": true,
+          "scale_factor": 1,
+          "frames": [
+            "176",
+            0
+          ]
+        },
+        "class_type": "RIFE VFI",
+        "_meta": {
+          "title": "RIFE VFI (recommend rife47 and rife49)"
+        }
+      },
+      "188": {
+        "inputs": {
+          "boolean": [
+            "197",
+            0
+          ],
+          "on_true": [
+            "198",
+            0
+          ],
+          "on_false": [
+            "141",
+            0
+          ]
+        },
+        "class_type": "Switch any [Crystools]",
+        "_meta": {
+          "title": "🪛 Switch any"
+        }
+      },
+      "189": {
+        "inputs": {
+          "width": 16,
+          "height": 16,
+          "batch_size": 1
+        },
+        "class_type": "EmptyLatentImage",
+        "_meta": {
+          "title": "Empty Latent Image"
+        }
+      },
+      "190": {
+        "inputs": {
+          "dimensions": " 832 x 1216  (portrait)",
+          "clip_scale": 1,
+          "batch_size": 1
+        },
+        "class_type": "SDXL Empty Latent Image (rgthree)",
+        "_meta": {
+          "title": "SDXL Empty Latent Image (rgthree)"
+        }
+      },
+      "191": {
+        "inputs": {
+          "boolean": [
+            "197",
+            0
+          ],
+          "on_true": [
+            "189",
+            0
+          ],
+          "on_false": [
+            "190",
+            0
+          ]
+        },
+        "class_type": "Switch any [Crystools]",
+        "_meta": {
+          "title": "🪛 Switch any"
+        }
+      },
+      "192": {
+        "inputs": {
+          "value": 1
+        },
+        "class_type": "easy int",
+        "_meta": {
+          "title": "Int"
+        }
+      },
+      "193": {
+        "inputs": {
+          "value": 8
+        },
+        "class_type": "easy int",
+        "_meta": {
+          "title": "Int"
+        }
+      },
+      "194": {
+        "inputs": {
+          "text": [
+            "202",
+            0
+          ]
+        },
+        "class_type": "Text to Number",
+        "_meta": {
+          "title": "Text to Number"
+        }
+      },
+      "195": {
+        "inputs": {
+          "number": [
+            "194",
+            0
+          ]
+        },
+        "class_type": "Number to Int",
+        "_meta": {
+          "title": "Number to Int"
+        }
+      },
+      "197": {
+        "inputs": {
+          "comparison": "a >= b",
+          "a": [
+            "201",
+            0
+          ],
+          "b": [
+            "195",
+            0
+          ]
+        },
+        "class_type": "easy compare",
+        "_meta": {
+          "title": "Compare"
+        }
+      },
+      "198": {
+        "inputs": {
+          "width": 1,
+          "height": 1,
+          "upscale_method": "nearest-exact",
+          "keep_proportion": "stretch",
+          "pad_color": "0, 0, 0",
+          "crop_position": "center",
+          "divisible_by": 1,
+          "device": "cpu",
+          "image": [
+            "141",
+            0
+          ]
+        },
+        "class_type": "ImageResizeKJv2",
+        "_meta": {
+          "title": "Resize Image v2"
+        }
+      },
+      "200": {
+        "inputs": {
+          "boolean": [
+            "197",
+            0
+          ],
+          "on_true": [
+            "192",
+            0
+          ],
+          "on_false": [
+            "193",
+            0
+          ]
+        },
+        "class_type": "Switch any [Crystools]",
+        "_meta": {
+          "title": "🪛 Switch any"
+        }
+      },
+      "201": {
+        "inputs": {
+          "value": 20
+        },
+        "class_type": "easy int",
+        "_meta": {
+          "title": "Int"
+        }
+      },
+      "202": {
+        "inputs": {
+          "text": "Look carefully at the person in the image.\nEstimate their age in years as a single number between 1 and 100.\nAnswer only with the number (no words).",
+          "seed": 42,
+          "extract_keywords": false,
+          "temperature": 0.7,
+          "keep_model_loaded": true,
+          "images": [
+            "141",
+            0
+          ]
+        },
+        "class_type": "MiniCPM_VQA_Simple",
+        "_meta": {
+          "title": "MiniCPM VQA Simple"
+        }
+      },
+      "204": {
+        "inputs": {
+          "text": "hair "
+        },
+        "class_type": "Text Multiline",
+        "_meta": {
+          "title": "Text Multiline"
+        }
+      },
+      "205": {
+        "inputs": {
+          "mode": "interrogate",
+          "question": "Breast size",
+          "min_length": 1,
+          "max_length": 1024,
+          "num_beams": 5,
+          "no_repeat_ngram_size": 3,
+          "early_stopping": false,
+          "images": [
+            "188",
+            0
+          ],
+          "blip_model": [
+            "155",
+            0
+          ]
+        },
+        "class_type": "BLIP Analyze Image",
+        "_meta": {
+          "title": "BLIP Analyze Image"
+        }
+      },
+      "206": {
+        "inputs": {
+          "text": "breast"
+        },
+        "class_type": "Text Multiline",
+        "_meta": {
+          "title": "Text Multiline"
+        }
+      },
+      "207": {
+        "inputs": {
+          "mode": "interrogate",
+          "question": "eye color",
+          "min_length": 1,
+          "max_length": 1024,
+          "num_beams": 5,
+          "no_repeat_ngram_size": 3,
+          "early_stopping": false,
+          "images": [
+            "188",
+            0
+          ],
+          "blip_model": [
+            "155",
+            0
+          ]
+        },
+        "class_type": "BLIP Analyze Image",
+        "_meta": {
+          "title": "BLIP Analyze Image"
+        }
+      },
+      "208": {
+        "inputs": {
+          "text": "eyes"
+        },
+        "class_type": "Text Multiline",
+        "_meta": {
+          "title": "Text Multiline"
+        }
+      },
+      "209": {
+        "inputs": {
+          "text": "skin"
+        },
+        "class_type": "Text Multiline",
+        "_meta": {
+          "title": "Text Multiline"
+        }
+      },
+      "210": {
+        "inputs": {
+          "delimiter": " ",
+          "clean_whitespace": "true",
+          "text_a": [
+            "205",
+            0
+          ],
+          "text_b": [
+            "206",
+            0
+          ]
+        },
+        "class_type": "Text Concatenate",
+        "_meta": {
+          "title": "Text Concatenate"
+        }
+      },
+      "211": {
+        "inputs": {
+          "delimiter": " ",
+          "clean_whitespace": "true",
+          "text_a": [
+            "225",
+            0
+          ],
+          "text_b": [
+            "226",
+            0
+          ],
+          "text_c": [
+            "214",
+            0
+          ],
+          "text_d": [
+            "204",
+            0
+          ]
+        },
+        "class_type": "Text Concatenate",
+        "_meta": {
+          "title": "Text Concatenate"
+        }
+      },
+      "212": {
+        "inputs": {
+          "delimiter": " ",
+          "clean_whitespace": "true",
+          "text_a": [
+            "207",
+            0
+          ],
+          "text_b": [
+            "208",
+            0
+          ]
+        },
+        "class_type": "Text Concatenate",
+        "_meta": {
+          "title": "Text Concatenate"
+        }
+      },
+      "213": {
+        "inputs": {
+          "delimiter": " ",
+          "clean_whitespace": "true",
+          "text_a": [
+            "220",
+            0
+          ],
+          "text_b": [
+            "209",
+            0
+          ]
+        },
+        "class_type": "Text Concatenate",
+        "_meta": {
+          "title": "Text Concatenate"
+        }
+      },
+      "214": {
+        "inputs": {
+          "mode": "interrogate",
+          "question": "Hair type",
+          "min_length": 1,
+          "max_length": 1024,
+          "num_beams": 5,
+          "no_repeat_ngram_size": 3,
+          "early_stopping": false,
+          "images": [
+            "188",
+            0
+          ],
+          "blip_model": [
+            "155",
+            0
+          ]
+        },
+        "class_type": "BLIP Analyze Image",
+        "_meta": {
+          "title": "BLIP Analyze Image"
+        }
+      },
+      "215": {
+        "inputs": {
+          "text": "years old "
+        },
+        "class_type": "Text Multiline",
+        "_meta": {
+          "title": "Text Multiline"
+        }
+      },
+      "216": {
+        "inputs": {
+          "delimiter": " ",
+          "clean_whitespace": "true",
+          "text_a": [
+            "217",
+            0
+          ],
+          "text_b": [
+            "215",
+            0
+          ]
+        },
+        "class_type": "Text Concatenate",
+        "_meta": {
+          "title": "Text Concatenate"
+        }
+      },
+      "217": {
+        "inputs": {
+          "mode": "interrogate",
+          "question": "age",
+          "min_length": 1,
+          "max_length": 1024,
+          "num_beams": 5,
+          "no_repeat_ngram_size": 3,
+          "early_stopping": false,
+          "images": [
+            "188",
+            0
+          ],
+          "blip_model": [
+            "155",
+            0
+          ]
+        },
+        "class_type": "BLIP Analyze Image",
+        "_meta": {
+          "title": "BLIP Analyze Image"
+        }
+      },
+      "219": {
+        "inputs": {
+          "delimiter": ", ",
+          "clean_whitespace": "true",
+          "text_a": [
+            "210",
+            0
+          ],
+          "text_b": [
+            "211",
+            0
+          ],
+          "text_c": [
+            "212",
+            0
+          ],
+          "text_d": [
+            "213",
+            0
+          ]
+        },
+        "class_type": "Text Concatenate",
+        "_meta": {
+          "title": "Text Concatenate"
+        }
+      },
+      "220": {
+        "inputs": {
+          "mode": "interrogate",
+          "question": "skin color",
+          "min_length": 1,
+          "max_length": 1024,
+          "num_beams": 5,
+          "no_repeat_ngram_size": 3,
+          "early_stopping": false,
+          "images": [
+            "188",
+            0
+          ],
+          "blip_model": [
+            "155",
+            0
+          ]
+        },
+        "class_type": "BLIP Analyze Image",
+        "_meta": {
+          "title": "BLIP Analyze Image"
+        }
+      },
+      "221": {
+        "inputs": {
+          "delimiter": ", ",
+          "clean_whitespace": "true",
+          "text_a": [
+            "216",
+            0
+          ],
+          "text_b": [
+            "219",
+            0
+          ],
+          "text_c": [
+            "222",
+            0
+          ],
+          "text_d": [
+            "228",
+            0
+          ]
+        },
+        "class_type": "Text Concatenate",
+        "_meta": {
+          "title": "Text Concatenate"
+        }
+      },
+      "222": {
+        "inputs": {
+          "delimiter": " ",
+          "clean_whitespace": "true",
+          "text_a": [
+            "223",
+            0
+          ],
+          "text_b": [
+            "224",
+            0
+          ]
+        },
+        "class_type": "Text Concatenate",
+        "_meta": {
+          "title": "Text Concatenate"
+        }
+      },
+      "223": {
+        "inputs": {
+          "mode": "interrogate",
+          "question": "is she wearing glasses",
+          "min_length": 1,
+          "max_length": 1024,
+          "num_beams": 5,
+          "no_repeat_ngram_size": 3,
+          "early_stopping": false,
+          "images": [
+            "188",
+            0
+          ],
+          "blip_model": [
+            "155",
+            0
+          ]
+        },
+        "class_type": "BLIP Analyze Image",
+        "_meta": {
+          "title": "BLIP Analyze Image"
+        }
+      },
+      "224": {
+        "inputs": {
+          "text": "glasses"
+        },
+        "class_type": "Text Multiline",
+        "_meta": {
+          "title": "Text Multiline"
+        }
+      },
+      "225": {
+        "inputs": {
+          "mode": "interrogate",
+          "question": "Hair color",
+          "min_length": 1,
+          "max_length": 1024,
+          "num_beams": 5,
+          "no_repeat_ngram_size": 4,
+          "early_stopping": false,
+          "images": [
+            "188",
+            0
+          ],
+          "blip_model": [
+            "155",
+            0
+          ]
+        },
+        "class_type": "BLIP Analyze Image",
+        "_meta": {
+          "title": "BLIP Analyze Image"
+        }
+      },
+      "226": {
+        "inputs": {
+          "mode": "interrogate",
+          "question": "Hair style",
+          "min_length": 1,
+          "max_length": 1024,
+          "num_beams": 5,
+          "no_repeat_ngram_size": 3,
+          "early_stopping": false,
+          "images": [
+            "188",
+            0
+          ],
+          "blip_model": [
+            "155",
+            0
+          ]
+        },
+        "class_type": "BLIP Analyze Image",
+        "_meta": {
+          "title": "BLIP Analyze Image"
+        }
+      },
+      "227": {
+        "inputs": {
+          "find": "very large build",
+          "replace": "morbidly Obese",
+          "text": [
+            "230",
+            0
+          ]
+        },
+        "class_type": "Text Find and Replace",
+        "_meta": {
+          "title": "Text Find and Replace"
+        }
+      },
+      "228": {
+        "inputs": {
+          "find": "large build",
+          "replace": "Obese",
+          "text": [
+            "227",
+            0
+          ]
+        },
+        "class_type": "Text Find and Replace",
+        "_meta": {
+          "title": "Text Find and Replace"
+        }
+      },
+      "230": {
+        "inputs": {
+          "text": "Look carefully at the full body of the person in the image.\nCompare their proportions (waist, arms, legs, and face) to an average adult. \nFrom the list below, choose the term that best matches:\n[\"very thin\", \"thin\", \"average\", \"large build\", \"very large build\"].\nAnswer with only one phrase from the list.\n",
+          "seed": 1125,
+          "extract_keywords": false,
+          "temperature": 0.7,
+          "keep_model_loaded": true,
+          "images": [
+            "188",
+            0
+          ]
+        },
+        "class_type": "MiniCPM_VQA_Simple",
+        "_meta": {
+          "title": "MiniCPM VQA Simple"
+        }
+      }
+    }
+  }
+}

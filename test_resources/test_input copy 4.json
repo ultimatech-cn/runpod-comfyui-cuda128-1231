@@ -1,0 +1,703 @@
+{
+  "input": {
+    "images": [
+      {
+        "name": "test_img.jpg",
+        "image": "https://pic.imgdd.cc/item/69071860c1e67097311264a1.jpg"
+      }
+    ],
+    "workflow": {
+      "3": {
+        "inputs": {
+          "seed": 769787199289008,
+          "steps": 8,
+          "cfg": 1.1,
+          "sampler_name": "lcm",
+          "scheduler": "exponential",
+          "denoise": 1,
+          "model": [
+            "111",
+            0
+          ],
+          "positive": [
+            "22",
+            0
+          ],
+          "negative": [
+            "23",
+            0
+          ],
+          "latent_image": [
+            "46",
+            0
+          ]
+        },
+        "class_type": "KSampler",
+        "_meta": {
+          "title": "KSampler"
+        }
+      },
+      "4": {
+        "inputs": {
+          "ckpt_name": "SDXL/ultraRealisticByStable_v20FP16.safetensors"
+        },
+        "class_type": "CheckpointLoaderSimple",
+        "_meta": {
+          "title": "Load Checkpoint"
+        }
+      },
+      "8": {
+        "inputs": {
+          "samples": [
+            "3",
+            0
+          ],
+          "vae": [
+            "4",
+            2
+          ]
+        },
+        "class_type": "VAEDecode",
+        "_meta": {
+          "title": "VAE Decode"
+        }
+      },
+      "12": {
+        "inputs": {
+          "image": "test_img.jpg"
+        },
+        "class_type": "LoadImage",
+        "_meta": {
+          "title": "Load Image"
+        }
+      },
+      "16": {
+        "inputs": {
+          "pulid_file": "ip-adapter_pulid_sdxl_fp16.safetensors"
+        },
+        "class_type": "PulidModelLoader",
+        "_meta": {
+          "title": "Load PuLID Model"
+        }
+      },
+      "19": {
+        "inputs": {},
+        "class_type": "PulidEvaClipLoader",
+        "_meta": {
+          "title": "Load Eva Clip (PuLID)"
+        }
+      },
+      "22": {
+        "inputs": {
+          "text": [
+            "79",
+            0
+          ],
+          "clip": [
+            "111",
+            1
+          ]
+        },
+        "class_type": "CLIPTextEncode",
+        "_meta": {
+          "title": "CLIP Text Encode (Prompt)"
+        }
+      },
+      "23": {
+        "inputs": {
+          "text": "flaws in the eyes, flaws in the face, flaws, lowres, non-HDRi, low quality, worst quality,artifacts noise, text, watermark, glitch, deformed, mutated, ugly, disfigured, hands, low resolution, partially rendered objects,  deformed or partially rendered eyes, deformed, deformed eyeballs, cross-eyed,blurry",
+          "clip": [
+            "111",
+            1
+          ]
+        },
+        "class_type": "CLIPTextEncode",
+        "_meta": {
+          "title": "CLIP Text Encode (Prompt)"
+        }
+      },
+      "33": {
+        "inputs": {
+          "method": "fidelity",
+          "weight": 0.65,
+          "start_at": 0,
+          "end_at": 0.9,
+          "model": [
+            "44",
+            0
+          ],
+          "pulid": [
+            "16",
+            0
+          ],
+          "eva_clip": [
+            "19",
+            0
+          ],
+          "face_analysis": [
+            "45",
+            0
+          ],
+          "image": [
+            "12",
+            0
+          ]
+        },
+        "class_type": "ApplyPulid",
+        "_meta": {
+          "title": "Apply PuLID"
+        }
+      },
+      "44": {
+        "inputs": {
+          "lora_name": "SDXL/LCMV2-PONYplus-PAseer.safetensors",
+          "strength_model": 1,
+          "model": [
+            "4",
+            0
+          ]
+        },
+        "class_type": "LoraLoaderModelOnly",
+        "_meta": {
+          "title": "LoraLoaderModelOnly"
+        }
+      },
+      "45": {
+        "inputs": {
+          "provider": "CPU"
+        },
+        "class_type": "PulidInsightFaceLoader",
+        "_meta": {
+          "title": "Load InsightFace (PuLID)"
+        }
+      },
+      "46": {
+        "inputs": {
+          "dimensions": " 832 x 1216  (portrait)",
+          "clip_scale": 1,
+          "batch_size": 1
+        },
+        "class_type": "SDXL Empty Latent Image (rgthree)",
+        "_meta": {
+          "title": "SDXL Empty Latent Image (rgthree)"
+        }
+      },
+      "54": {
+        "inputs": {
+          "blip_model": "Salesforce/blip-image-captioning-base",
+          "vqa_model_id": "Salesforce/blip-vqa-base",
+          "device": "cuda"
+        },
+        "class_type": "BLIP Model Loader",
+        "_meta": {
+          "title": "BLIP Model Loader"
+        }
+      },
+      "79": {
+        "inputs": {
+          "delimiter": ", ",
+          "clean_whitespace": "true",
+          "text_a": [
+            "141",
+            0
+          ],
+          "text_b": [
+            "133",
+            0
+          ]
+        },
+        "class_type": "Text Concatenate",
+        "_meta": {
+          "title": "Text Concatenate"
+        }
+      },
+      "99": {
+        "inputs": {
+          "enabled": true,
+          "swap_model": "inswapper_128.onnx",
+          "facedetection": "retinaface_resnet50",
+          "face_restore_model": "GPEN-BFR-512.onnx",
+          "face_restore_visibility": 1,
+          "codeformer_weight": 0.5,
+          "detect_gender_input": "no",
+          "detect_gender_source": "no",
+          "input_faces_index": "0",
+          "source_faces_index": "0",
+          "console_log_level": 1,
+          "input_image": [
+            "8",
+            0
+          ],
+          "source_image": [
+            "12",
+            0
+          ]
+        },
+        "class_type": "ReActorFaceSwap",
+        "_meta": {
+          "title": "ReActor 🌌 Fast Face Swap"
+        }
+      },
+      "108": {
+        "inputs": {
+          "boolean": false,
+          "on_true": [
+            "8",
+            0
+          ],
+          "on_false": [
+            "99",
+            0
+          ]
+        },
+        "class_type": "Switch any [Crystools]",
+        "_meta": {
+          "title": "face involved ?"
+        }
+      },
+      "111": {
+        "inputs": {
+          "lora_name": "SDXL/subtle-analsex-xl3.safetensors",
+          "strength_model": 0.8,
+          "strength_clip": 0.8,
+          "model": [
+            "33",
+            0
+          ],
+          "clip": [
+            "4",
+            1
+          ]
+        },
+        "class_type": "LoraLoader",
+        "_meta": {
+          "title": "anal?"
+        }
+      },
+      "112": {
+        "inputs": {
+          "filename_prefix": "ComfyUI",
+          "images": [
+            "108",
+            0
+          ]
+        },
+        "class_type": "SaveImage",
+        "_meta": {
+          "title": "Save Image"
+        }
+      },
+      "117": {
+        "inputs": {
+          "mode": "interrogate",
+          "question": "Hair style",
+          "min_length": 1,
+          "max_length": 1024,
+          "num_beams": 5,
+          "no_repeat_ngram_size": 3,
+          "early_stopping": false,
+          "images": [
+            "12",
+            0
+          ],
+          "blip_model": [
+            "54",
+            0
+          ]
+        },
+        "class_type": "BLIP Analyze Image",
+        "_meta": {
+          "title": "BLIP Analyze Image"
+        }
+      },
+      "118": {
+        "inputs": {
+          "text": "hair "
+        },
+        "class_type": "Text Multiline",
+        "_meta": {
+          "title": "Text Multiline"
+        }
+      },
+      "119": {
+        "inputs": {
+          "mode": "interrogate",
+          "question": "Breast size",
+          "min_length": 1,
+          "max_length": 1024,
+          "num_beams": 5,
+          "no_repeat_ngram_size": 3,
+          "early_stopping": false,
+          "images": [
+            "12",
+            0
+          ],
+          "blip_model": [
+            "54",
+            0
+          ]
+        },
+        "class_type": "BLIP Analyze Image",
+        "_meta": {
+          "title": "BLIP Analyze Image"
+        }
+      },
+      "120": {
+        "inputs": {
+          "text": "breast"
+        },
+        "class_type": "Text Multiline",
+        "_meta": {
+          "title": "Text Multiline"
+        }
+      },
+      "121": {
+        "inputs": {
+          "mode": "interrogate",
+          "question": "eye color",
+          "min_length": 1,
+          "max_length": 1024,
+          "num_beams": 5,
+          "no_repeat_ngram_size": 3,
+          "early_stopping": false,
+          "images": [
+            "12",
+            0
+          ],
+          "blip_model": [
+            "54",
+            0
+          ]
+        },
+        "class_type": "BLIP Analyze Image",
+        "_meta": {
+          "title": "BLIP Analyze Image"
+        }
+      },
+      "122": {
+        "inputs": {
+          "text": "eyes"
+        },
+        "class_type": "Text Multiline",
+        "_meta": {
+          "title": "Text Multiline"
+        }
+      },
+      "123": {
+        "inputs": {
+          "text": "skin"
+        },
+        "class_type": "Text Multiline",
+        "_meta": {
+          "title": "Text Multiline"
+        }
+      },
+      "124": {
+        "inputs": {
+          "delimiter": " ",
+          "clean_whitespace": "true",
+          "text_a": [
+            "119",
+            0
+          ],
+          "text_b": [
+            "120",
+            0
+          ]
+        },
+        "class_type": "Text Concatenate",
+        "_meta": {
+          "title": "Text Concatenate"
+        }
+      },
+      "125": {
+        "inputs": {
+          "delimiter": " ",
+          "clean_whitespace": "true",
+          "text_a": [
+            "121",
+            0
+          ],
+          "text_b": [
+            "122",
+            0
+          ]
+        },
+        "class_type": "Text Concatenate",
+        "_meta": {
+          "title": "Text Concatenate"
+        }
+      },
+      "126": {
+        "inputs": {
+          "delimiter": " ",
+          "clean_whitespace": "true",
+          "text_a": [
+            "132",
+            0
+          ],
+          "text_b": [
+            "123",
+            0
+          ]
+        },
+        "class_type": "Text Concatenate",
+        "_meta": {
+          "title": "Text Concatenate"
+        }
+      },
+      "127": {
+        "inputs": {
+          "mode": "interrogate",
+          "question": "Hair type",
+          "min_length": 1,
+          "max_length": 1024,
+          "num_beams": 5,
+          "no_repeat_ngram_size": 3,
+          "early_stopping": false,
+          "images": [
+            "12",
+            0
+          ],
+          "blip_model": [
+            "54",
+            0
+          ]
+        },
+        "class_type": "BLIP Analyze Image",
+        "_meta": {
+          "title": "BLIP Analyze Image"
+        }
+      },
+      "128": {
+        "inputs": {
+          "text": "years old "
+        },
+        "class_type": "Text Multiline",
+        "_meta": {
+          "title": "Text Multiline"
+        }
+      },
+      "129": {
+        "inputs": {
+          "delimiter": " ",
+          "clean_whitespace": "true",
+          "text_a": [
+            "130",
+            0
+          ],
+          "text_b": [
+            "128",
+            0
+          ]
+        },
+        "class_type": "Text Concatenate",
+        "_meta": {
+          "title": "Text Concatenate"
+        }
+      },
+      "130": {
+        "inputs": {
+          "mode": "interrogate",
+          "question": "age",
+          "min_length": 1,
+          "max_length": 1024,
+          "num_beams": 5,
+          "no_repeat_ngram_size": 3,
+          "early_stopping": false,
+          "images": [
+            "12",
+            0
+          ],
+          "blip_model": [
+            "54",
+            0
+          ]
+        },
+        "class_type": "BLIP Analyze Image",
+        "_meta": {
+          "title": "BLIP Analyze Image"
+        }
+      },
+      "132": {
+        "inputs": {
+          "mode": "interrogate",
+          "question": "skin color",
+          "min_length": 1,
+          "max_length": 1024,
+          "num_beams": 5,
+          "no_repeat_ngram_size": 3,
+          "early_stopping": false,
+          "images": [
+            "12",
+            0
+          ],
+          "blip_model": [
+            "54",
+            0
+          ]
+        },
+        "class_type": "BLIP Analyze Image",
+        "_meta": {
+          "title": "BLIP Analyze Image"
+        }
+      },
+      "133": {
+        "inputs": {
+          "delimiter": ", ",
+          "clean_whitespace": "true",
+          "text_a": [
+            "129",
+            0
+          ],
+          "text_b": [
+            "138",
+            0
+          ],
+          "text_c": [
+            "134",
+            0
+          ]
+        },
+        "class_type": "Text Concatenate",
+        "_meta": {
+          "title": "Text Concatenate"
+        }
+      },
+      "134": {
+        "inputs": {
+          "delimiter": " ",
+          "clean_whitespace": "true",
+          "text_a": [
+            "135",
+            0
+          ],
+          "text_b": [
+            "136",
+            0
+          ]
+        },
+        "class_type": "Text Concatenate",
+        "_meta": {
+          "title": "Text Concatenate"
+        }
+      },
+      "135": {
+        "inputs": {
+          "mode": "interrogate",
+          "question": "is she wearing glasses",
+          "min_length": 1,
+          "max_length": 1024,
+          "num_beams": 5,
+          "no_repeat_ngram_size": 3,
+          "early_stopping": false,
+          "images": [
+            "12",
+            0
+          ],
+          "blip_model": [
+            "54",
+            0
+          ]
+        },
+        "class_type": "BLIP Analyze Image",
+        "_meta": {
+          "title": "BLIP Analyze Image"
+        }
+      },
+      "136": {
+        "inputs": {
+          "text": "glasses"
+        },
+        "class_type": "Text Multiline",
+        "_meta": {
+          "title": "Text Multiline"
+        }
+      },
+      "137": {
+        "inputs": {
+          "mode": "interrogate",
+          "question": "Hair color",
+          "min_length": 1,
+          "max_length": 1024,
+          "num_beams": 5,
+          "no_repeat_ngram_size": 4,
+          "early_stopping": false,
+          "images": [
+            "12",
+            0
+          ],
+          "blip_model": [
+            "54",
+            0
+          ]
+        },
+        "class_type": "BLIP Analyze Image",
+        "_meta": {
+          "title": "BLIP Analyze Image"
+        }
+      },
+      "138": {
+        "inputs": {
+          "delimiter": ", ",
+          "clean_whitespace": "true",
+          "text_a": [
+            "124",
+            0
+          ],
+          "text_b": [
+            "139",
+            0
+          ],
+          "text_c": [
+            "125",
+            0
+          ],
+          "text_d": [
+            "126",
+            0
+          ]
+        },
+        "class_type": "Text Concatenate",
+        "_meta": {
+          "title": "Text Concatenate"
+        }
+      },
+      "139": {
+        "inputs": {
+          "delimiter": " ",
+          "clean_whitespace": "true",
+          "text_a": [
+            "137",
+            0
+          ],
+          "text_b": [
+            "117",
+            0
+          ],
+          "text_c": [
+            "127",
+            0
+          ],
+          "text_d": [
+            "118",
+            0
+          ]
+        },
+        "class_type": "Text Concatenate",
+        "_meta": {
+          "title": "Text Concatenate"
+        }
+      },
+      "141": {
+        "inputs": {
+          "text": "A girl is passionately performing (anal sex:2) on a partner, her movements fluid and intense."
+        },
+        "class_type": "Text Multiline",
+        "_meta": {
+          "title": "Text Multiline"
+        }
+      }
+    }
+  }
+}
