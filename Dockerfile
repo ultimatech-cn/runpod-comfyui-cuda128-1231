@@ -16,7 +16,7 @@ COPY handler.py /handler.py
 # Copy custom start.sh to override the base image's start script
 # This includes symlink setup for Network Volume model directories
 COPY src/start.sh /start.sh
-RUN chmod +x /start.sh
+RUN chmod +x /start.sh && sed -i 's/\r$//' /start.sh
 
 # Ensure required tools are installed (wget, git, unzip should already be in base image, but verify)
 # Note: build-essential, g++, and python3-dev are needed to compile insightface (Cython/C++ extensions)
