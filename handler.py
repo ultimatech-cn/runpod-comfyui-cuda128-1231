@@ -17,6 +17,13 @@ import logging
 import sys
 import warnings
 
+# Pin CUDA visibility before any torch-dependent import path can initialize CUDA.
+os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")
+
+# Prefer the newer allocator variable while remaining compatible with legacy configs.
+if "PYTORCH_CUDA_ALLOC_CONF" in os.environ and "PYTORCH_ALLOC_CONF" not in os.environ:
+    os.environ["PYTORCH_ALLOC_CONF"] = os.environ["PYTORCH_CUDA_ALLOC_CONF"]
+
 # CRITICAL: Configure numba BEFORE importing any modules that use numba
 # Numba's SSA block analysis and other debug logs can be very verbose
 # These print statements bypass logging, so we need to suppress them early

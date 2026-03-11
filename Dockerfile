@@ -8,6 +8,8 @@ FROM runpod/worker-comfyui:5.7.1-base-cuda12.8.1
 # Set environment variables for better maintainability
 ENV COMFYUI_PATH=/comfyui
 ENV DEBIAN_FRONTEND=noninteractive
+ENV CUDA_VISIBLE_DEVICES=0
+ENV PYTORCH_ALLOC_CONF=backend:cudaMallocAsync
 
 # Copy custom handler.py to override the base image's handler
 # This allows you to use your enhanced handler with URL image support and path normalization

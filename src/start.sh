@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+# Pin CUDA visibility before any Python process starts.
+# RunPod Serverless may inject CUDA_VISIBLE_DEVICES late; defaulting it here keeps torch initialization stable.
+export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}"
+
+# Prefer the non-deprecated PyTorch allocator variable and mirror any legacy setting if present.
+if [ -n "${PYTORCH_CUDA_ALLOC_CONF:-}" ] && [ -z "${PYTORCH_ALLOC_CONF:-}" ]; then
+    export PYTORCH_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF}"
+fi
+
 # Use libtcmalloc for better memory management
 TCMALLOC="$(ldconfig -p | grep -Po "libtcmalloc.so.\d" | head -n 1)"
 export LD_PRELOAD="${TCMALLOC}"

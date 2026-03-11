@@ -1,0 +1,62 @@
+========================================
+Bug Report 鈥?ComfyUI on RunPod Serverless
+2026-03-07
+========================================
+
+1. 鐜淇℃伅
+--------------------------
+骞冲彴     : RunPod Serverless
+鎿嶄綔绯荤粺 : Linux (Container)
+Python   : 3.12.3 (GCC 13.3.0)
+CUDA     : 12.8.1
+Venv     : /opt/venv/bin/python
+ComfyUI  : /comfyui
+
+
+2. 闂鎻忚堪
+------------------------------
+ComfyUI 鍚姩鏃跺彂鐢?CUDA 鍒濆鍖栭敊璇紝瀵艰嚧鏈嶅姟鏃犳硶鍚姩锛屾墍鏈夎姹傚け璐ャ€?
+
+3. 閿欒淇℃伅
+-----------------------------
+  File "/comfyui/comfy/model_management.py", line 239
+    total_vram = get_total_memory(get_torch_device()) / (1024 * 1024)
+  File "/comfyui/comfy/model_management.py", line 189
+    return torch.device(torch.cuda.current_device())
+
+  RuntimeError: CUDA unknown error - this may be due to an incorrectly
+  set up environment, e.g. changing env variable CUDA_VISIBLE_DEVICES
+  after program start. Setting the available devices to be zero.
+
+
+4. 鏍规湰鍘熷洜
+--------------------------
+RunPod Serverless 鍦ㄥ鍣ㄥ惎鍔ㄣ€屼箣鍚庛€嶆墠鍔ㄦ€佹敞鍏?CUDA_VISIBLE_DEVICES 鐜鍙橀噺銆?姝ゆ椂 PyTorch 鐨?CUDA 鍒濆鍖栧凡鎵ц瀹屾瘯锛屽鑷村唴閮ㄧ姸鎬佹崯鍧忋€?
+閿欒杩為攣鍙嶅簲锛?  1. CUDA_VISIBLE_DEVICES 琚姩鎬佹敞鍏?鈫?PyTorch CUDA 鐘舵€佹崯鍧?  2. ComfyUI main.py 宕╂簝锛宲ort 8188 鏈紑鍚?  3. RunPod Handler 灏濊瘯杩炵嚎 1000 娆″悗鏀惧純
+  4. Websocket receive timed out 鈥?鎵€鏈?job 澶辫触
+
+
+5. 寤鸿淇鏂规
+-----------------------------------
+
+[鏂规 A] Dockerfile ENV锛堟渶绠€鍗曪級
+  ENV CUDA_VISIBLE_DEVICES=0
+  鍦?build 鏃跺啓姝伙紝纭繚鍦ㄤ换浣?Python 鍒濆鍖栧墠璁剧疆濂姐€?
+[鏂规 B] 鍦?Python main.py 鏈€椤堕儴鎻掑叆
+  import os
+  os.environ["CUDA_VISIBLE_DEVICES"] = "0"  # 蹇呴』鍦?import torch 涔嬪墠
+  # ... 鍏朵綑鍘熸湰鐨?import
+  纭繚鍦ㄤ换浣?torch import 鍓嶈鐩栫幆澧冨彉閲忋€?
+[鏂规 C] RunPod Template 鐜鍙橀噺璁剧疆
+  鍦?RunPod 鍚庡彴 鈫?Template 鈫?Environment Variables 鏂板锛?  CUDA_VISIBLE_DEVICES = 0
+
+鈽?鎺ㄨ崘缁勫悎锛氭柟妗?A + 鏂规 B 鍚屾椂浣跨敤锛屽弻閲嶄繚闄?
+
+6. 闄勫姞璀﹀憡
+----------------------------------
+鏃ュ織涓彟鏈?deprecation warning锛?  [W] PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead
+
+璇峰皢鎵€鏈?PYTORCH_CUDA_ALLOC_CONF 鐜鍙橀噺鏀瑰悕涓?PYTORCH_ALLOC_CONF銆?
+========================================
+鐢熸垚鏃堕棿锛?026-03-07 | RunPod Serverless / ComfyUI Bug Report
+========================================
