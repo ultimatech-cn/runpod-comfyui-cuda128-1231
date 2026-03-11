@@ -7,20 +7,39 @@
 # - 临时 Pod：Network Volume 通常挂载在 /workspace
 # - Endpoint：Network Volume 挂载在 /runpod-volume
 # 这是同一个 Network Volume，只是挂载点不同
-# 在临时 Pod 中下载到 /workspace/models/ 的文件
-# 在 Endpoint 中可以从 /runpod-volume/models/ 访问
+# 
+# 路径自动检测：
+# - 如果存在 /workspace/storage 目录，自动使用 /workspace/storage/models
+# - 否则使用 /workspace/models
+# 在 Endpoint 中，start.sh 会自动检测 /runpod-volume/storage/models 或 /runpod-volume/models
 #
 # 用法：
 #   bash scripts/download-models-to-volume.sh [VOLUME_PATH]
-#   如果不指定 VOLUME_PATH，默认使用 /workspace（RunPod 临时 Pod 的默认挂载点）
+#   如果不指定 VOLUME_PATH，默认使用 /workspace（会自动检测 storage 子目录）
 #   如果临时 Pod 中 Network Volume 挂载到 /runpod-volume，使用：
 #   bash scripts/download-models-to-volume.sh /runpod-volume
+
+# 自动修复 Windows 换行符问题（如果脚本在 Windows 上编辑过）
+if command -v sed &> /dev/null; then
+    # 检查并修复当前脚本文件的换行符
+    if grep -q $'\r' "$0" 2>/dev/null; then
+        sed -i 's/\r$//' "$0" 2>/dev/null || true
+    fi
+fi
 
 set -e  # 遇到错误立即退出
 
 # 获取 Volume 路径（默认为 /workspace，RunPod 临时 Pod 的默认挂载点）
+# 支持 /workspace/storage/models 路径（客户环境）
 VOLUME_PATH="${1:-/workspace}"
-MODELS_DIR="$VOLUME_PATH/models"
+# 自动检测 storage 子目录
+if [ -d "$VOLUME_PATH/storage" ]; then
+    MODELS_DIR="$VOLUME_PATH/storage/models"
+    echo "检测到 storage 目录，使用: $MODELS_DIR"
+else
+    MODELS_DIR="$VOLUME_PATH/models"
+    echo "使用标准路径: $MODELS_DIR"
+fi
 
 echo "=========================================="
 echo "ComfyUI 模型批量下载脚本"
@@ -41,12 +60,14 @@ echo "创建目录结构..."
 mkdir -p "$MODELS_DIR/checkpoints/SDXL"
 mkdir -p "$MODELS_DIR/checkpoints/Wan2.2"
 mkdir -p "$MODELS_DIR/clip_vision/wan"
+mkdir -p "$MODELS_DIR/ipadapter"
 mkdir -p "$MODELS_DIR/pulid"
 mkdir -p "$MODELS_DIR/insightface/models"
 mkdir -p "$MODELS_DIR/insightface"  # 确保 insightface 根目录存在（用于 inswapper_128.onnx）
 mkdir -p "$MODELS_DIR/reswapper"
 mkdir -p "$MODELS_DIR/hyperswap"
 mkdir -p "$MODELS_DIR/facerestore_models"
+mkdir -p "$MODELS_DIR/facedetection"
 mkdir -p "$MODELS_DIR/upscale_models"
 mkdir -p "$MODELS_DIR/loras/SDXL"
 mkdir -p "$MODELS_DIR/loras/Wan2.2"
@@ -55,6 +76,8 @@ mkdir -p "$MODELS_DIR/diffusion_models"
 mkdir -p "$MODELS_DIR/prompt_generator/MiniCPM-V-2_6-int4"
 mkdir -p "$MODELS_DIR/ultralytics/bbox"
 mkdir -p "$MODELS_DIR/sams"
+mkdir -p "$MODELS_DIR/vfi"
+mkdir -p "$MODELS_DIR/LLM"
 echo "✓ 目录结构创建完成"
 echo ""
 
@@ -101,7 +124,17 @@ echo "=========================================="
 download_file \
     "https://huggingface.co/datasets/Robin9527/LoRA/resolve/main/SDXL/ultraRealisticByStable_v20FP16.safetensors" \
     "$MODELS_DIR/checkpoints/SDXL/ultraRealisticByStable_v20FP16.safetensors" \
-    "SDXL Checkpoint"
+    "SDXL Checkpoint (ultraRealistic)"
+
+download_file \
+    "https://civitai.com/api/download/models/2514310?type=Model&format=SafeTensor&size=pruned&fp=fp16" \
+    "$MODELS_DIR/checkpoints/SDXL/WAIillustriousSDXL.safetensors" \
+    "SDXL Checkpoint (WAIillustrious)"
+
+download_file \
+    "https://civitai.com/api/download/models/2328744?type=Model&format=SafeTensor&size=full&fp=fp16&token=da9c68a812ddbd35562e160050152591" \
+    "$MODELS_DIR/checkpoints/SDXL/RealMixPony.safetensors" \
+    "SDXL Checkpoint (RealMixPony)"
 
 download_file \
     "https://huggingface.co/Phr00t/WAN2.2-14B-Rapid-AllInOne/resolve/main/v10/wan2.2-i2v-rapid-aio-v10-nsfw.safetensors" \
@@ -123,9 +156,24 @@ download_file \
     "CLIP Vision (WAN)"
 
 download_file \
+    "https://huggingface.co/h94/IP-Adapter/resolve/main/models/image_encoder/model.safetensors" \
+    "$MODELS_DIR/clip_vision/CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors" \
+    "CLIP Vision (IP-Adapter)"
+
+download_file \
     "https://huggingface.co/huchenlei/ipadapter_pulid/resolve/main/ip-adapter_pulid_sdxl_fp16.safetensors" \
     "$MODELS_DIR/pulid/ip-adapter_pulid_sdxl_fp16.safetensors" \
     "PuLID IP-Adapter"
+
+download_file \
+    "https://huggingface.co/h94/IP-Adapter/resolve/main/sdxl_models/ip-adapter-plus_sdxl_vit-h.safetensors" \
+    "$MODELS_DIR/ipadapter/ip-adapter-plus_sdxl_vit-h.safetensors" \
+    "IP-Adapter Plus (SDXL)"
+
+download_file \
+    "https://huggingface.co/h94/IP-Adapter/resolve/main/sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors" \
+    "$MODELS_DIR/ipadapter/ip-adapter-plus-face_sdxl_vit-h.safetensors" \
+    "IP-Adapter Plus Face (SDXL)"
 
 echo ""
 
@@ -212,6 +260,44 @@ download_file \
     "https://huggingface.co/datasets/Gourieff/ReActor/resolve/main/models/facerestore_models/GPEN-BFR-512.onnx" \
     "$MODELS_DIR/facerestore_models/GPEN-BFR-512.onnx" \
     "GPEN-BFR-512"
+
+echo ""
+
+# ============================================
+# FaceDetailer 依赖模型
+# ============================================
+echo "=========================================="
+echo "下载 FaceDetailer 依赖模型"
+echo "=========================================="
+
+download_file \
+    "https://huggingface.co/Bingsu/adetailer/resolve/main/face_yolov8m.pt" \
+    "$MODELS_DIR/ultralytics/bbox/face_yolov8m.pt" \
+    "Face YOLOv8m (Ultralytics)"
+
+download_file \
+    "https://github.com/xinntao/facexlib/releases/download/v0.1.0/detection_Resnet50_Final.pth" \
+    "$MODELS_DIR/facedetection/detection_Resnet50_Final.pth" \
+    "Face Detection ResNet50"
+
+download_file \
+    "https://github.com/sczhou/CodeFormer/releases/download/v0.1.0/parsing_parsenet.pth" \
+    "$MODELS_DIR/facedetection/parsing_parsenet.pth" \
+    "Face Parsing ParseNet"
+
+echo ""
+
+# ============================================
+# RIFE VFI 补帧模型
+# ============================================
+echo "=========================================="
+echo "下载 RIFE VFI 补帧模型"
+echo "=========================================="
+
+download_file \
+    "https://github.com/styler00dollar/VSGAN-tensorrt-docker/releases/download/models/rife47.pth" \
+    "$MODELS_DIR/vfi/rife47.pth" \
+    "RIFE VFI rife47"
 
 echo ""
 
@@ -407,6 +493,60 @@ PYTHON_SCRIPT
 else
     echo "⚠ Python3 未找到，跳过 BLIP 模型下载"
     echo "  提示: BLIP 模型会在首次使用时自动下载"
+fi
+
+echo ""
+
+# ============================================
+# Florence-2 提示词生成模型
+# ============================================
+echo "=========================================="
+echo "下载 Florence-2 提示词生成模型"
+echo "=========================================="
+
+if command -v python3 &> /dev/null; then
+    echo "检查 huggingface_hub 是否已安装..."
+    continue_section=false
+    if ! python3 -c "import huggingface_hub" 2>/dev/null; then
+        echo "huggingface_hub 未安装，正在自动安装..."
+        if pip install --quiet huggingface_hub 2>/dev/null || pip3 install --quiet huggingface_hub 2>/dev/null; then
+            echo "✓ huggingface_hub 安装完成"
+            continue_section=true
+        else
+            echo "✗ 无法安装 huggingface_hub，跳过 Florence-2 模型下载"
+            echo "  提示: 请手动安装: pip install huggingface_hub"
+        fi
+    else
+        echo "✓ huggingface_hub 已安装"
+        continue_section=true
+    fi
+    
+    if [ "$continue_section" = "true" ]; then
+        echo "使用 Python huggingface_hub 下载 Florence-2 模型..."
+        python3 << PYTHON_SCRIPT
+from huggingface_hub import snapshot_download
+import os
+
+model_dir = '$MODELS_DIR/LLM'
+os.makedirs(model_dir, exist_ok=True)
+
+print('下载 Florence-2-large-PromptGen-v2.0 模型（完整目录）...')
+try:
+    snapshot_download(
+        repo_id='MiaoshouAI/Florence-2-large-PromptGen-v2.0',
+        local_dir=model_dir,
+        local_dir_use_symlinks=False,
+        ignore_patterns=["*.msgpack", "*.h5", "*.ot"]
+    )
+    print('✓ Florence-2 模型下载完成')
+except Exception as e:
+    print(f'✗ 下载失败: {e}')
+    print('提示: 请检查网络连接或手动安装: pip install huggingface_hub')
+PYTHON_SCRIPT
+    fi
+else
+    echo "⚠ Python3 未找到，跳过 Florence-2 模型下载"
+    echo "  提示: Florence-2 模型会在首次使用时自动下载（但可能导致 API 超时）"
 fi
 
 echo ""
