@@ -1,0 +1,436 @@
+{
+  "input": {
+    "images": [
+      {
+        "name": "test_img.jpg",
+        "image": "https://pic.imgdd.cc/item/69549c5572912317d4d49ff5.webp"
+      }
+    ],
+    "workflow": {
+  "2": {
+    "inputs": {
+      "shift": 5,
+      "model": [
+        "100",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingSD3",
+    "_meta": {
+      "title": "采样算法（SD3）"
+    }
+  },
+  "4": {
+    "inputs": {
+      "text": [
+        "124",
+        0
+      ],
+      "clip": [
+        "100",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative (leave blank)"
+    }
+  },
+  "5": {
+    "inputs": {
+      "text": [
+        "123",
+        0
+      ],
+      "clip": [
+        "100",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive Input"
+    }
+  },
+  "7": {
+    "inputs": {
+      "samples": [
+        "115",
+        0
+      ],
+      "vae": [
+        "110",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE解码"
+    }
+  },
+  "9": {
+    "inputs": {
+      "width": 896,
+      "height": 1120,
+      "length": 81,
+      "batch_size": 1,
+      "positive": [
+        "5",
+        0
+      ],
+      "negative": [
+        "4",
+        0
+      ],
+      "vae": [
+        "110",
+        0
+      ],
+      "start_image": [
+        "103",
+        0
+      ]
+    },
+    "class_type": "WanImageToVideo",
+    "_meta": {
+      "title": "Wan图像到视频"
+    }
+  },
+  "47": {
+    "inputs": {
+      "ckpt_name": "rife47.pth",
+      "clear_cache_after_n_frames": 127,
+      "multiplier": 2,
+      "fast_mode": true,
+      "ensemble": true,
+      "scale_factor": 1,
+      "batch_size": 1,
+      "torch_compile": false,
+      "dtype": "float32",
+      "frames": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "RIFE VFI",
+    "_meta": {
+      "title": "RIFE VFI (recommend rife47 and rife49)"
+    }
+  },
+  "48": {
+    "inputs": {
+      "frame_rate": 30,
+      "loop_count": 0,
+      "filename_prefix": "AnimateDiff",
+      "format": "video/h264-mp4",
+      "pix_fmt": "yuv420p",
+      "crf": 19,
+      "save_metadata": true,
+      "trim_to_audio": false,
+      "pingpong": false,
+      "save_output": true,
+      "images": [
+        "47",
+        0
+      ]
+    },
+    "class_type": "VHS_VideoCombine",
+    "_meta": {
+      "title": "VIDEO"
+    }
+  },
+  "98": {
+    "inputs": {
+      "lora_name": "GeneralHIGH.safetensors",
+      "strength_model": 0,
+      "strength_clip": 0,
+      "model": [
+        "120",
+        0
+      ],
+      "clip": [
+        "104",
+        0
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "加载LoRA_1HIGH"
+    }
+  },
+  "99": {
+    "inputs": {
+      "lora_name": "DR34ML4YHIGH.safetensors",
+      "strength_model": 0,
+      "strength_clip": 0,
+      "model": [
+        "98",
+        0
+      ],
+      "clip": [
+        "98",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "加载LoRA_2HIGH"
+    }
+  },
+  "100": {
+    "inputs": {
+      "lora_name": "CumshotHIGH.safetensors",
+      "strength_model": 0,
+      "strength_clip": 0,
+      "model": [
+        "99",
+        0
+      ],
+      "clip": [
+        "99",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "加载LoRA_3HIGH"
+    }
+  },
+  "101": {
+    "inputs": {
+      "lora_name": "GeneralLOW.safetensors",
+      "strength_model": 0,
+      "strength_clip": 0,
+      "model": [
+        "121",
+        0
+      ],
+      "clip": [
+        "104",
+        0
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "加载LoRA_1LOW"
+    }
+  },
+  "103": {
+    "inputs": {
+      "image": "test_img.jpg"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "加载图像"
+    }
+  },
+  "104": {
+    "inputs": {
+      "clip_name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "type": "wan",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "加载CLIP"
+    }
+  },
+  "107": {
+    "inputs": {
+      "lora_name": "DR34ML4YLOW.safetensors",
+      "strength_model": 0,
+      "strength_clip": 0,
+      "model": [
+        "101",
+        0
+      ],
+      "clip": [
+        "101",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "加载LoRA_2LOW"
+    }
+  },
+  "108": {
+    "inputs": {
+      "lora_name": "CumshotLOW.safetensors",
+      "strength_model": 0,
+      "strength_clip": 0,
+      "model": [
+        "107",
+        0
+      ],
+      "clip": [
+        "107",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "加载LoRA_3LOW"
+    }
+  },
+  "110": {
+    "inputs": {
+      "vae_name": "wan_2.1_vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "加载VAE"
+    }
+  },
+  "112": {
+    "inputs": {
+      "text": [
+        "123",
+        0
+      ],
+      "clip": [
+        "108",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive Input"
+    }
+  },
+  "113": {
+    "inputs": {
+      "text": [
+        "124",
+        0
+      ],
+      "clip": [
+        "108",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative (leave blank)"
+    }
+  },
+  "114": {
+    "inputs": {
+      "add_noise": "enable",
+      "noise_seed": 622923990456027,
+      "steps": 4,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "start_at_step": 0,
+      "end_at_step": 2,
+      "return_with_leftover_noise": "enable",
+      "model": [
+        "2",
+        0
+      ],
+      "positive": [
+        "9",
+        0
+      ],
+      "negative": [
+        "9",
+        1
+      ],
+      "latent_image": [
+        "9",
+        2
+      ]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": {
+      "title": "K采样器（高级）"
+    }
+  },
+  "115": {
+    "inputs": {
+      "add_noise": "disable",
+      "noise_seed": 0,
+      "steps": 4,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "start_at_step": 2,
+      "end_at_step": 4,
+      "return_with_leftover_noise": "disable",
+      "model": [
+        "116",
+        0
+      ],
+      "positive": [
+        "112",
+        0
+      ],
+      "negative": [
+        "113",
+        0
+      ],
+      "latent_image": [
+        "114",
+        0
+      ]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": {
+      "title": "K采样器（高级）"
+    }
+  },
+  "116": {
+    "inputs": {
+      "shift": 5,
+      "model": [
+        "108",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingSD3",
+    "_meta": {
+      "title": "采样算法（SD3）"
+    }
+  },
+  "120": {
+    "inputs": {
+      "unet_name": "DaSiWaV9HIGH.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "UNet加载器"
+    }
+  },
+  "121": {
+    "inputs": {
+      "unet_name": "DaSiWaV9LOW.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "UNet加载器"
+    }
+  },
+  "123": {
+    "inputs": {
+      "text": "(bl0wj0b), blowjob, deepthroat, balls deep slowly, a video of a anime girl performing deepthroat blowjob slowly, She moves slowly her head back and forth sucking the man's penis while looking at the viewer, the full penis deep into mouth"
+    },
+    "class_type": "Text Multiline",
+    "_meta": {
+      "title": "POS"
+    }
+  },
+  "124": {
+    "inputs": {
+      "text": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走, 3d 渲染、视频游戏"
+    },
+    "class_type": "Text Multiline",
+    "_meta": {
+      "title": "NEG"
+    }
+  }
+    }
+  }
+}

@@ -20,7 +20,7 @@
 
 ```bash
 # Windows PowerShell
-cd "E:\Program Files\runpod-comfyui-cuda128"
+cd "E:\Program Files\runpod-comfyui-cuda128-1231"
 
 # 构建镜像（替换 your-username 为您的 Docker Hub 用户名）
 docker build --platform linux/amd64 -t runpod-comfyui-cuda128:local .
@@ -74,10 +74,12 @@ docker-compose up --build
 
 ```powershell
 # Windows PowerShell
-$jsonContent = Get-Content "test_input copy 4.json" -Raw
+$jsonContent = Get-Content "test_resources\moshimosh_sdxl_runpod.json" -Raw -Encoding UTF8
 $response = Invoke-RestMethod -Uri "http://localhost:8000/runsync" -Method Post -Body $jsonContent -ContentType "application/json"
 $response | ConvertTo-Json -Depth 10
 ```
+
+如需测试视频阶段，请将文件路径切换为 `test_resources\moshimosh_videogen_runpod.json`。
 
 #### 方法 3: 使用 Python 脚本
 
@@ -88,7 +90,7 @@ import requests
 import json
 
 # 读取测试输入
-with open('test_input copy 4.json', 'r', encoding='utf-8') as f:
+with open('test_resources/moshimosh_sdxl_runpod.json', 'r', encoding='utf-8') as f:
     test_input = json.load(f)
 
 # 发送请求
@@ -241,7 +243,7 @@ New-Item -ItemType Directory -Force -Path ".\data\runpod-volume"
 docker-compose up
 
 # 4. 测试 API (新终端)
-curl -X POST http://localhost:8000/runsync -H "Content-Type: application/json" -d @test_input_copy_4.json
+curl -X POST http://localhost:8000/runsync -H "Content-Type: application/json" --data-binary "@test_resources/moshimosh_sdxl_runpod.json"
 
 # 5. 停止服务
 docker-compose down

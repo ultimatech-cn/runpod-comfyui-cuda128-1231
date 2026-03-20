@@ -13,7 +13,12 @@ logs*.txt
 
 # Test files and resources
 test_input copy*.json
-test_resources/
+test_resources/*
+!test_resources/archive/
+test_resources/archive/*
+!test_resources/README.md
+!test_resources/moshimosh_sdxl_runpod.json
+!test_resources/moshimosh_videogen_runpod.json
 output/
 input/
 temp/

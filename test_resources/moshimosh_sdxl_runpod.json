@@ -1,0 +1,585 @@
+{
+  "input": {
+    "images": [
+      {
+        "name": "test_img.jpg",
+        "image": "https://pic.imgdd.cc/item/69549c5572912317d4d49ff5.webp"
+      }
+    ],
+    "workflow": {
+      "13": {
+        "inputs": {
+          "text": "score_4,score_5,score_6,cat,messy_drawing,amateur_drawing,bad_drawing,ugly_eyes,worst_quality,low_quality,normal_quality,low_resolution",
+          "clip": [
+            "16",
+            1
+          ]
+        },
+        "class_type": "CLIPTextEncode",
+        "_meta": {
+          "title": "CLIP文本编码"
+        }
+      },
+      "14": {
+        "inputs": {
+          "text": [
+            "26",
+            0
+          ],
+          "clip": [
+            "16",
+            1
+          ]
+        },
+        "class_type": "CLIPTextEncode",
+        "_meta": {
+          "title": "CLIP文本编码"
+        }
+      },
+      "15": {
+        "inputs": {
+          "seed": 1069941981898513,
+          "steps": 30,
+          "cfg": 6,
+          "sampler_name": "dpmpp_2m",
+          "scheduler": "karras",
+          "denoise": 1,
+          "model": [
+            "60",
+            0
+          ],
+          "positive": [
+            "14",
+            0
+          ],
+          "negative": [
+            "13",
+            0
+          ],
+          "latent_image": [
+            "17",
+            0
+          ]
+        },
+        "class_type": "KSampler",
+        "_meta": {
+          "title": "K采样器"
+        }
+      },
+      "16": {
+        "inputs": {
+          "ckpt_name": "SDXL/RealMixPony.safetensors"
+        },
+        "class_type": "CheckpointLoaderSimple",
+        "_meta": {
+          "title": "Checkpoint加载器（简易）"
+        }
+      },
+      "17": {
+        "inputs": {
+          "width": [
+            "44",
+            0
+          ],
+          "height": [
+            "45",
+            0
+          ],
+          "batch_size": 1
+        },
+        "class_type": "EmptyLatentImage",
+        "_meta": {
+          "title": "空Latent图像"
+        }
+      },
+      "18": {
+        "inputs": {
+          "samples": [
+            "15",
+            0
+          ],
+          "vae": [
+            "16",
+            2
+          ]
+        },
+        "class_type": "VAEDecode",
+        "_meta": {
+          "title": "VAE解码"
+        }
+      },
+      "19": {
+        "inputs": {
+          "filename_prefix": "ComfyUI",
+          "images": [
+            "18",
+            0
+          ]
+        },
+        "class_type": "SaveImage",
+        "_meta": {
+          "title": "保存图像"
+        }
+      },
+      "23": {
+        "inputs": {
+          "image": "test_img.jpg"
+        },
+        "class_type": "LoadImage",
+        "_meta": {
+          "title": "load_image"
+        }
+      },
+      "26": {
+        "inputs": {
+          "part1": "score_9,score_8_up,score_7_up",
+          "part2": [
+            "27",
+            0
+          ],
+          "part3": [
+            "61",
+            0
+          ],
+          "part4": "",
+          "separator": ","
+        },
+        "class_type": "CR Combine Prompt",
+        "_meta": {
+          "title": "⚙️ CR Combine Prompt"
+        }
+      },
+      "27": {
+        "inputs": {
+          "text": ""
+        },
+        "class_type": "Text Multiline",
+        "_meta": {
+          "title": "input_setting"
+        }
+      },
+      "35": {
+        "inputs": {
+          "text_input": "",
+          "task": "prompt_gen_tags",
+          "fill_mask": false,
+          "keep_model_loaded": true,
+          "max_new_tokens": 1024,
+          "num_beams": 3,
+          "do_sample": false,
+          "output_mask_select": "",
+          "seed": 657360490290415,
+          "image": [
+            "23",
+            0
+          ],
+          "florence2_model": [
+            "36",
+            0
+          ]
+        },
+        "class_type": "Florence2Run",
+        "_meta": {
+          "title": "Florence2Run"
+        }
+      },
+      "36": {
+        "inputs": {
+          "model": "MiaoshouAI/Florence-2-large-PromptGen-v2.0",
+          "precision": "fp16",
+          "attention": "sdpa",
+          "convert_to_safetensors": false
+        },
+        "class_type": "DownloadAndLoadFlorence2Model",
+        "_meta": {
+          "title": "DownloadAndLoadFlorence2Model"
+        }
+      },
+      "41": {
+        "inputs": {
+          "weight": 0.2,
+          "start_at": 0.2,
+          "end_at": 0.8,
+          "weight_type": "standard",
+          "model": [
+            "42",
+            0
+          ],
+          "ipadapter": [
+            "42",
+            1
+          ],
+          "image": [
+            "23",
+            0
+          ]
+        },
+        "class_type": "IPAdapter",
+        "_meta": {
+          "title": "IPAdapter"
+        }
+      },
+      "42": {
+        "inputs": {
+          "preset": "PLUS FACE (portraits)",
+          "model": [
+            "16",
+            0
+          ]
+        },
+        "class_type": "IPAdapterUnifiedLoader",
+        "_meta": {
+          "title": "IPAdapter Unified Loader"
+        }
+      },
+      "44": {
+        "inputs": {
+          "value": 912
+        },
+        "class_type": "PrimitiveInt",
+        "_meta": {
+          "title": "w"
+        }
+      },
+      "45": {
+        "inputs": {
+          "value": 1144
+        },
+        "class_type": "PrimitiveInt",
+        "_meta": {
+          "title": "h"
+        }
+      },
+      "46": {
+        "inputs": {
+          "find1": "underwear, panties",
+          "replace1": "",
+          "find2": "looking at viewer",
+          "replace2": "",
+          "find3": "closed eyes",
+          "replace3": "",
+          "prompt": [
+            "49",
+            0
+          ]
+        },
+        "class_type": "easy promptReplace",
+        "_meta": {
+          "title": "提示词替换"
+        }
+      },
+      "49": {
+        "inputs": {
+          "find1": "closed mouth",
+          "replace1": "",
+          "find2": "indoors",
+          "replace2": "",
+          "find3": "open mouth",
+          "replace3": "",
+          "prompt": [
+            "51",
+            0
+          ]
+        },
+        "class_type": "easy promptReplace",
+        "_meta": {
+          "title": "提示词替换"
+        }
+      },
+      "51": {
+        "inputs": {
+          "find1": "standing",
+          "replace1": "",
+          "find2": "full body",
+          "replace2": "",
+          "find3": "sky",
+          "replace3": "",
+          "prompt": [
+            "52",
+            0
+          ]
+        },
+        "class_type": "easy promptReplace",
+        "_meta": {
+          "title": "提示词替换"
+        }
+      },
+      "52": {
+        "inputs": {
+          "find1": "simple background",
+          "replace1": "",
+          "find2": "upper body",
+          "replace2": "",
+          "find3": "tears",
+          "replace3": "",
+          "prompt": [
+            "35",
+            2
+          ]
+        },
+        "class_type": "easy promptReplace",
+        "_meta": {
+          "title": "提示词替换"
+        }
+      },
+      "53": {
+        "inputs": {
+          "part1": "(",
+          "part2": [
+            "89",
+            0
+          ],
+          "part3": ":0.7)",
+          "part4": "",
+          "separator": ""
+        },
+        "class_type": "CR Combine Prompt",
+        "_meta": {
+          "title": "⚙️ CR Combine Prompt"
+        }
+      },
+      "54": {
+        "inputs": {
+          "text": "taiwan woman"
+        },
+        "class_type": "Text Multiline",
+        "_meta": {
+          "title": "custom_character"
+        }
+      },
+      "60": {
+        "inputs": {
+          "model_a": [
+            "16",
+            0
+          ],
+          "model_b": [
+            "41",
+            0
+          ],
+          "boolean": [
+            "62",
+            0
+          ]
+        },
+        "class_type": "Model Input Switch",
+        "_meta": {
+          "title": "Model Input Switch"
+        }
+      },
+      "61": {
+        "inputs": {
+          "text_a": [
+            "54",
+            0
+          ],
+          "text_b": [
+            "53",
+            0
+          ],
+          "boolean": [
+            "62",
+            0
+          ]
+        },
+        "class_type": "Text Input Switch",
+        "_meta": {
+          "title": "Text Input Switch"
+        }
+      },
+      "62": {
+        "inputs": {
+          "value": false
+        },
+        "class_type": "Bool-🔬",
+        "_meta": {
+          "title": "custom_character_switch"
+        }
+      },
+      "72": {
+        "inputs": {
+          "guide_size": 512,
+          "guide_size_for": true,
+          "max_size": 1024,
+          "seed": 235504911904198,
+          "steps": 5,
+          "cfg": 6,
+          "sampler_name": "euler",
+          "scheduler": "simple",
+          "denoise": 0.25,
+          "feather": 8,
+          "noise_mask": true,
+          "force_inpaint": true,
+          "bbox_threshold": 0.5,
+          "bbox_dilation": 10,
+          "bbox_crop_factor": 3,
+          "sam_detection_hint": "center-1",
+          "sam_dilation": 0,
+          "sam_threshold": 0.93,
+          "sam_bbox_expansion": 0,
+          "sam_mask_hint_threshold": 0.7,
+          "sam_mask_hint_use_negative": "False",
+          "drop_size": 10,
+          "wildcard": "",
+          "cycle": 1,
+          "inpaint_model": false,
+          "noise_mask_feather": 20,
+          "tiled_encode": false,
+          "tiled_decode": false,
+          "image": [
+            "91",
+            0
+          ],
+          "model": [
+            "60",
+            0
+          ],
+          "clip": [
+            "16",
+            1
+          ],
+          "vae": [
+            "16",
+            2
+          ],
+          "positive": [
+            "14",
+            0
+          ],
+          "negative": [
+            "13",
+            0
+          ],
+          "bbox_detector": [
+            "81",
+            0
+          ]
+        },
+        "class_type": "FaceDetailer",
+        "_meta": {
+          "title": "FaceDetailer"
+        }
+      },
+      "81": {
+        "inputs": {
+          "model_name": "bbox/face_yolov8m.pt"
+        },
+        "class_type": "UltralyticsDetectorProvider",
+        "_meta": {
+          "title": "UltralyticsDetectorProvider"
+        }
+      },
+      "82": {
+        "inputs": {
+          "enabled": true,
+          "swap_model": "inswapper_128.onnx",
+          "facedetection": "retinaface_resnet50",
+          "face_restore_model": "GPEN-BFR-512.onnx",
+          "face_restore_visibility": 1,
+          "codeformer_weight": 1,
+          "detect_gender_input": "no",
+          "detect_gender_source": "no",
+          "input_faces_index": "0",
+          "source_faces_index": "0",
+          "console_log_level": 1,
+          "input_image": [
+            "18",
+            0
+          ],
+          "source_image": [
+            "23",
+            0
+          ]
+        },
+        "class_type": "ReActorFaceSwap",
+        "_meta": {
+          "title": "ReActor 🌌 Fast Face Swap"
+        }
+      },
+      "85": {
+        "inputs": {
+          "sharpen_radius": 1,
+          "sigma": 0.4,
+          "alpha": 0.8,
+          "image": [
+            "72",
+            0
+          ]
+        },
+        "class_type": "ImageSharpen",
+        "_meta": {
+          "title": "锐化图像"
+        }
+      },
+      "86": {
+        "inputs": {
+          "filename_prefix": "ComfyUI",
+          "images": [
+            "85",
+            0
+          ]
+        },
+        "class_type": "SaveImage",
+        "_meta": {
+          "title": "保存图像"
+        }
+      },
+      "88": {
+        "inputs": {
+          "find1": "close-up",
+          "replace1": "",
+          "find2": "background",
+          "replace2": "",
+          "find3": "pov",
+          "replace3": "",
+          "prompt": [
+            "46",
+            0
+          ]
+        },
+        "class_type": "easy promptReplace",
+        "_meta": {
+          "title": "提示词替换"
+        }
+      },
+      "89": {
+        "inputs": {
+          "find1": "double v",
+          "replace1": "",
+          "find2": "ring on head",
+          "replace2": "",
+          "find3": "smile",
+          "replace3": "",
+          "prompt": [
+            "88",
+            0
+          ]
+        },
+        "class_type": "easy promptReplace",
+        "_meta": {
+          "title": "提示词替换"
+        }
+      },
+      "91": {
+        "inputs": {
+          "image_a": [
+            "18",
+            0
+          ],
+          "image_b": [
+            "82",
+            0
+          ],
+          "boolean": [
+            "62",
+            0
+          ]
+        },
+        "class_type": "Image Input Switch",
+        "_meta": {
+          "title": "Image Input Switch"
+        }
+      }
+    }
+  }
+}
